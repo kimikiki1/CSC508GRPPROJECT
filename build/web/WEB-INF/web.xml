@@ -4,34 +4,52 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
 
-    <welcome-file-list>
-        <welcome-file>login.jsp</welcome-file>
-    </welcome-file-list>
-
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>com.petie.controller.LoginServlet</servlet-class>
     </servlet>
+
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>com.petie.controller.RegisterServlet</servlet-class>
     </servlet>
+
     <servlet>
         <servlet-name>ReportStrayServlet</servlet-name>
         <servlet-class>com.petie.controller.ReportStrayServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.petie.controller.LogoutServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/RegisterServlet</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>ReportStrayServlet</servlet-name>
         <url-pattern>/ReportStrayServlet</url-pattern>
     </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/LogoutServlet</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>login.jsp</welcome-file>
+    </welcome-file-list>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
 
 </web-app>

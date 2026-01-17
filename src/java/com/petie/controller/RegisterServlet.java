@@ -23,7 +23,7 @@ public class RegisterServlet extends HttpServlet {
 
         if (result.equals("SUCCESS")) {
             request.setAttribute("errMessage", "Registration Successful! Please Login.");
-            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
         } else {
             request.setAttribute("errMessage", result);
             request.getRequestDispatcher("/register.jsp").forward(request, response);

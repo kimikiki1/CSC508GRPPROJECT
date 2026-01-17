@@ -20,11 +20,12 @@ public class UserDao {
         String emailDB = "";
         String passwordDB = "";
         String roleDB = "";
-        String icDB = "";
+        int idDB = 0; // New variable for ID
 
         try {
             con = DBConnection.createConnection();
-            statement = con.prepareStatement("SELECT IC_NUMBER, EMAIL, PASSWORD, ROLE FROM USERS WHERE EMAIL = ?");
+            // Fetch USER_ID as well
+            statement = con.prepareStatement("SELECT USER_ID, EMAIL, PASSWORD, ROLE FROM USERS WHERE EMAIL = ?");
             statement.setString(1, email);
             resultSet = statement.executeQuery();
 
@@ -32,12 +33,12 @@ public class UserDao {
                 emailDB = resultSet.getString("EMAIL");
                 passwordDB = resultSet.getString("PASSWORD");
                 roleDB = resultSet.getString("ROLE");
-                icDB = resultSet.getString("IC_NUMBER");
+                idDB = resultSet.getInt("USER_ID"); // Get the ID
 
                 if (email.equals(emailDB) && password.equals(passwordDB)) {
-                    // Update the bean with DB info so we can use it in session
+                    // Update bean with ID and Role
+                    loginBean.setUserId(idDB);
                     loginBean.setRole(roleDB);
-                    loginBean.setIcNumber(icDB);
                     return "SUCCESS";
                 }
             }
@@ -48,6 +49,7 @@ public class UserDao {
     }
 
     public String registerUser(UserBean registerBean) {
+        // We get everything EXCEPT the ID (Database creates ID)
         String icNumber = registerBean.getIcNumber();
         String email = registerBean.getEmail();
         String username = registerBean.getUsername();
@@ -60,7 +62,9 @@ public class UserDao {
 
         try {
             con = DBConnection.createConnection();
+            // REMOVED "USER_ID" from insert. Added "IC_NUMBER" as regular data.
             String query = "INSERT INTO USERS (IC_NUMBER, USERNAME, EMAIL, PASSWORD, FULL_NAME, PHONE_NUMBER) VALUES (?, ?, ?, ?, ?, ?)";
+            
             statement = con.prepareStatement(query);
             statement.setString(1, icNumber);
             statement.setString(2, username);
@@ -76,6 +80,6 @@ public class UserDao {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return "Registration Failed (IC or Email might exist)";
+        return "Registration Failed (Email might exist)";
     }
 }

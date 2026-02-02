@@ -11,26 +11,34 @@ import java.io.IOException;
 
 public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        UserBean loginBean = new UserBean();
-        loginBean.setEmail(request.getParameter("email"));
-        loginBean.setPassword(request.getParameter("password"));
+        // 1. Get input (This only has Email & Password)
+        UserBean tempUser = new UserBean();
+        tempUser.setEmail(request.getParameter("email"));
+        tempUser.setPassword(request.getParameter("password"));
 
-        UserDao loginDao = new UserDao();
-        String validate = loginDao.authenticateUser(loginBean);
+        // 2. Ask DAO for the FULL User details
+        UserDao dao = new UserDao();
+        UserBean loggedInUser = dao.authenticateUser(tempUser); 
 
-        if (validate.equals("SUCCESS")) {
-            HttpSession session = request.getSession();
-            session.setAttribute("userSession", loginBean); // Store entire bean in session
-            session.setAttribute("role", loginBean.getRole());
-
-            if (loginBean.getRole().equals("ADMIN")) {
-                request.getRequestDispatcher("/admin_dashboard.jsp").forward(request, response);
+        // 3. Check if we got a user back
+        if (loggedInUser != null) {
+           HttpSession session = request.getSession();
+            session.setAttribute("userSession", loggedInUser); 
+            
+            // REDIRECT BASED ON ROLE
+            String role = loggedInUser.getRole();
+            
+            if ("ADMIN".equals(role)) {
+                response.sendRedirect("admin_dashboard.jsp");
+            } else if ("STAFF".equals(role)) {
+                response.sendRedirect("staff_dashboard.jsp"); // <--- NEW LINE
             } else {
-                request.getRequestDispatcher("/home.jsp").forward(request, response);
+                response.sendRedirect("home.jsp");
             }
         } else {
-            request.setAttribute("errMessage", validate);
-            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            // FAIL
+            request.setAttribute("errMessage", "Invalid email or password");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
 }

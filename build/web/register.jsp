@@ -7,7 +7,6 @@
     
     <div style="background-color: white; width: 400px; margin: auto; padding: 20px; border-radius: 10px;">
         <form action="RegisterServlet" method="post">
-            IC Number: <input type="text" name="icNumber" required><br><br>
             Username: <input type="text" name="username" required><br><br>
             Email: <input type="email" name="email" required><br><br>
             Password: <input type="password" name="password" required><br><br>

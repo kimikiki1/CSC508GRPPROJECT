@@ -1,12 +1,8 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.petie.bean.UserBean"%>
 <%
-    // Security Check: Ensure user is logged in
     UserBean user = (UserBean) session.getAttribute("userSession");
-    if (user == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
+    if (user == null) { response.sendRedirect("login.jsp"); return; }
 %>
 <!DOCTYPE html>
 <html>
@@ -14,9 +10,6 @@
     <title>Home - Petie Adoptie</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #87ceeb; margin: 0; }
-        .navbar { background-color: #003366; padding: 15px; color: white; display: flex; justify-content: space-between; align-items: center; }
-        .navbar a { color: white; text-decoration: none; margin: 0 15px; font-weight: bold; }
-        .navbar a:hover { text-decoration: underline; }
         .container { text-align: center; padding: 50px; }
         .card { 
             background-color: white; 
@@ -42,19 +35,7 @@
 </head>
 <body>
 
-    <div class="navbar">
-        <div class="logo">Petie Adoptie</div>
-        <div>
-            <a href="home.jsp">Home</a>
-            <a href="adopt_me.jsp">Adopt Me</a>
-            <a href="report_stray.jsp">Report Stray Pet</a>
-            <a href="account_settings.jsp">My Account</a> 
-        </div>
-        <div>
-            <span>Welcome, <%= user.getUsername() %>!</span>
-            <a href="LogoutServlet" style="background-color: #dc3545; padding: 5px 10px; border-radius: 5px;">Log Out</a>
-        </div>
-    </div>
+    <jsp:include page="navbar.jsp" />
 
     <div class="container">
         <div class="welcome-banner">
@@ -82,6 +63,6 @@
             <a href="account_settings.jsp" class="btn" style="background-color: #007bff;">Manage Profile</a>
         </div>
     </div>
- 
+
 </body>
 </html>

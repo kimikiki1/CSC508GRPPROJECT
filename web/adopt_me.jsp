@@ -33,7 +33,7 @@
             try {
                 con = DBConnection.createConnection();
                 // Select all reports
-                String sql = "SELECT * FROM STRAY_REPORT"; 
+                String sql = "SELECT * FROM STRAY_REPORT WHERE STATUS = 'IN_CENTRE'";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery();
 
@@ -53,7 +53,7 @@
                     <div class="pet-details">📅 Found: <%= date %></div>
                     <div class="pet-details">📝 Situation: <%= situation %></div>
                 </div>
-                <a href="#" class="adopt-btn" onclick="alert('Adoption request sent for this <%= type %>!')">Adopt Me</a>
+                <a href="RequestAdoptionServlet?id=<%= rs.getInt("STRAY_ID") %>" class="adopt-btn">Request to Adopt</a>
             </div>
         <%
                 }
@@ -64,5 +64,16 @@
         %>
     </div>
 
+<script>
+        // Check URL for messages
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        
+        if (msg === 'duplicate') {
+            alert("⚠️ You have already requested to adopt this pet! Please wait for Staff approval.");
+        } else if (msg === 'success') {
+            alert("✅ Request Sent! Staff will review your application.");
+        }
+    </script>
 </body>
 </html>

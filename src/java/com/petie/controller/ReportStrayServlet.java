@@ -22,7 +22,7 @@ import java.nio.file.StandardCopyOption;
 public class ReportStrayServlet extends HttpServlet {
 
     // YOUR PATH (Double check this folder exists on your computer!)
-    private static final String UPLOAD_DIR = "C:\\Users\\USER\\OneDrive\\Documents\\NetBeansProjects\\TRYGIT\\images";
+    private static final String UPLOAD_DIR = "C:\\Users\\USER\\OneDrive\\Documents\\GitHub\\CSC508GRPPROJECT\\images";
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();

@@ -1,49 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
-         version="6.0">
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>com.petie.controller.LoginServlet</servlet-class>
     </servlet>
-
-    <servlet>
-        <servlet-name>RegisterServlet</servlet-name>
-        <servlet-class>com.petie.controller.RegisterServlet</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>ReportStrayServlet</servlet-name>
-        <servlet-class>com.petie.controller.ReportStrayServlet</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>LogoutServlet</servlet-name>
-        <servlet-class>com.petie.controller.LogoutServlet</servlet-class>
-    </servlet>
-
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>RegisterServlet</servlet-name>
+        <servlet-class>com.petie.controller.RegisterServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/RegisterServlet</url-pattern>
     </servlet-mapping>
 
-    <servlet-mapping>
-        <servlet-name>ReportStrayServlet</servlet-name>
-        <url-pattern>/ReportStrayServlet</url-pattern>
-    </servlet-mapping>
-
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.petie.controller.LogoutServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LogoutServlet</servlet-name>
         <url-pattern>/LogoutServlet</url-pattern>
     </servlet-mapping>
-    
+
     <servlet>
         <servlet-name>UpdateProfileServlet</servlet-name>
         <servlet-class>com.petie.controller.UpdateProfileServlet</servlet-class>
@@ -53,12 +39,63 @@
         <url-pattern>/UpdateProfileServlet</url-pattern>
     </servlet-mapping>
 
+
+    <servlet>
+        <servlet-name>ReportStrayServlet</servlet-name>
+        <servlet-class>com.petie.controller.ReportStrayServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ReportStrayServlet</servlet-name>
+        <url-pattern>/ReportStrayServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ImageServlet</servlet-name>
+        <servlet-class>com.petie.controller.ImageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ImageServlet</servlet-name>
+        <url-pattern>/images/*</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>ProcessReportServlet</servlet-name>
+        <servlet-class>com.petie.controller.ProcessReportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ProcessReportServlet</servlet-name>
+        <url-pattern>/ProcessReportServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>RequestAdoptionServlet</servlet-name>
+        <servlet-class>com.petie.controller.RequestAdoptionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RequestAdoptionServlet</servlet-name>
+        <url-pattern>/RequestAdoptionServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ProcessAdoptionServlet</servlet-name>
+        <servlet-class>com.petie.controller.ProcessAdoptionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ProcessAdoptionServlet</servlet-name>
+        <url-pattern>/ProcessAdoptionServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
     </welcome-file-list>
-
-    <session-config>
-        <session-timeout>30</session-timeout>
-    </session-config>
 
 </web-app>

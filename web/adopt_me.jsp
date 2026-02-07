@@ -585,6 +585,38 @@
                         <i class="fas fa-redo"></i> Reset
                     </button>
                 </div>
+
+    <jsp:include page="navbar.jsp" />
+
+    <h1 style="text-align:center; margin-top: 30px; color: #003366;">Find Your New Best Friend 🐶🐱</h1>
+
+    <div class="gallery">
+        <%
+            Connection con = null;
+            try {
+                con = DBConnection.createConnection();
+                // Select all reports
+                String sql = "SELECT * FROM STRAY_REPORT WHERE STATUS = 'IN_CENTRE'";
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery();
+
+                while(rs.next()) {
+                    String type = rs.getString("PET_TYPE");
+                    String location = rs.getString("LOCATION_FOUND");
+                    String situation = rs.getString("SITUATION");
+                    String date = rs.getString("DATE_FOUND");
+                    String photo = rs.getString("PET_PHOTO"); 
+        %>
+            <div class="pet-card">
+                <img src="images/<%= photo %>" class="pet-img" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                
+                <div class="pet-info">
+                    <div class="pet-name"><%= type %></div>
+                    <div class="pet-details">📍 Location: <%= location %></div>
+                    <div class="pet-details">📅 Found: <%= date %></div>
+                    <div class="pet-details">📝 Situation: <%= situation %></div>
+                </div>
+                <a href="RequestAdoptionServlet?id=<%= rs.getInt("STRAY_ID") %>" class="adopt-btn">Request to Adopt</a>
             </div>
             
             <!-- Pets Grid -->
@@ -1119,5 +1151,16 @@ window.addEventListener('resize', function() {
             margin-top: 20px;
         }
     </style>
+<script>
+        // Check URL for messages
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        
+        if (msg === 'duplicate') {
+            alert("⚠️ You have already requested to adopt this pet! Please wait for Staff approval.");
+        } else if (msg === 'success') {
+            alert("✅ Request Sent! Staff will review your application.");
+        }
+    </script>
 </body>
 </html>

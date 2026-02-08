@@ -3,14 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/web/my_application.jsp</file>
+            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/src/java/com/petie/controller/ProcessAdoptionServlet.java</file>
+            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/src/java/com/petie/controller/RequestAdoptionServlet.java</file>
+            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/src/java/com/petie/controller/ReportStrayServlet.java</file>
+            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/src/java/com/petie/controller/UpdateReportStatusServlet.java</file>
             <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/web/adopt_me.jsp</file>
-            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/web/manage_users.jsp</file>
-            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/web/login.jsp</file>
-            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/web/manage_adoptions.jsp</file>
-            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/web/WEB-INF/web.xml</file>
+            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/web/manage_reports.jsp</file>
+            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/src/java/com/petie/controller/RegisterServlet.java</file>
             <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/nbproject/build-impl.xml</file>
-            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/web/admin_dashboard.jsp</file>
+            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/src/java/com/petie/dao/StraysDao.java</file>
+            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/src/java/com/petie/controller/ImageServlet.java</file>
+            <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/src/java/com/petie/controller/UpdateProfileServlet.java</file>
             <file>file:/C:/Users/USER/OneDrive/Documents/GitHub/CSC508GRPPROJECT/web/navbar.jsp</file>
         </group>
     </open-files>

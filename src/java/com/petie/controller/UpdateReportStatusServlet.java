@@ -8,12 +8,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet("/UpdateReportStatusServlet")
+
 public class UpdateReportStatusServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 1. Get ID and Status from URL (e.g., ?id=5&status=FOSTER)
         String idStr = request.getParameter("id");
         String status = request.getParameter("status");
 
@@ -21,7 +20,7 @@ public class UpdateReportStatusServlet extends HttpServlet {
             try {
                 int reportId = Integer.parseInt(idStr);
                 
-                // 2. Call DAO to update
+                // 1. Update the Database
                 StraysDao dao = new StraysDao();
                 dao.updateReportStatus(reportId, status);
                 
@@ -30,7 +29,7 @@ public class UpdateReportStatusServlet extends HttpServlet {
             }
         }
         
-        // 3. Redirect back to the list to see changes
-        response.sendRedirect("ManageReportsServlet");
+        // 2. CRITICAL FIX: Ensure this matches your JSP file name exactly!
+        response.sendRedirect("manage_reports.jsp"); 
     }
 }

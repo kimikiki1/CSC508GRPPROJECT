@@ -82,5 +82,26 @@ public class StraysDao {
         }
         return list;
     }
+    // 3. UPDATE REPORT STATUS
+    public boolean updateReportStatus(int strayId, String newStatus) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = DBConnection.createConnection();
+            String sql = "UPDATE STRAY_REPORT SET STATUS = ? WHERE STRAY_ID = ?";
+            ps = con.prepareStatement(sql);
+            ps.setString(1, newStatus);
+            ps.setInt(2, strayId);
+            
+            int i = ps.executeUpdate();
+            return i > 0; // Returns true if successful
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try { if(ps!=null) ps.close(); if(con!=null) con.close(); } catch(Exception e){}
+        }
+    }
     
 }

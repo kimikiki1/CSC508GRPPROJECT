@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDao {
 
@@ -83,4 +85,111 @@ public class UserDao {
         }
         return "Update Failed";
     }
+    
+    
+    // 4. GET ALL USERS (For Admin Dashboard)
+public List<UserBean> getAllUsers() {
+    List<UserBean> users = new ArrayList<>();
+    Connection con = null;
+    try {
+        con = DBConnection.createConnection();
+        String sql = "SELECT USER_ID, USERNAME, EMAIL, FULL_NAME, PHONE_NUMBER, ROLE FROM USERS";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            UserBean user = new UserBean();
+            user.setUserId(rs.getInt("USER_ID"));
+            user.setUsername(rs.getString("USERNAME"));
+            user.setEmail(rs.getString("EMAIL"));
+            user.setFullName(rs.getString("FULL_NAME"));
+            user.setPhoneNumber(rs.getString("PHONE_NUMBER"));
+            user.setRole(rs.getString("ROLE"));
+            users.add(user);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return users;
+}
+
+// 5. GET USER BY ID (For Edit Page)
+public UserBean getUserById(int id) {
+    UserBean user = null;
+    try {
+        Connection con = DBConnection.createConnection();
+        String sql = "SELECT * FROM USERS WHERE USER_ID = ?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, id);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            user = new UserBean();
+            user.setUserId(rs.getInt("USER_ID"));
+            user.setUsername(rs.getString("USERNAME"));
+            user.setEmail(rs.getString("EMAIL"));
+            user.setFullName(rs.getString("FULL_NAME"));
+            user.setPhoneNumber(rs.getString("PHONE_NUMBER"));
+            user.setRole(rs.getString("ROLE"));
+            // We usually don't fetch password for display security
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return user;
+}
+
+// 6. ADMIN UPDATE USER (Handles Role & Conditional Password)
+public boolean adminUpdateUser(UserBean user) {
+    Connection con = null;
+    try {
+        con = DBConnection.createConnection();
+        
+        // Check if password is empty (meaning admin didn't change it)
+        boolean updatePassword = user.getPassword() != null && !user.getPassword().trim().isEmpty();
+        
+        String sql;
+        if (updatePassword) {
+            sql = "UPDATE USERS SET FULL_NAME=?, USERNAME=?, EMAIL=?, PHONE_NUMBER=?, ROLE=?, PASSWORD=? WHERE USER_ID=?";
+        } else {
+            sql = "UPDATE USERS SET FULL_NAME=?, USERNAME=?, EMAIL=?, PHONE_NUMBER=?, ROLE=? WHERE USER_ID=?";
+        }
+        
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, user.getFullName());
+        ps.setString(2, user.getUsername());
+        ps.setString(3, user.getEmail());
+        ps.setString(4, user.getPhoneNumber());
+        ps.setString(5, user.getRole());
+        
+        if (updatePassword) {
+            ps.setString(6, user.getPassword());
+            ps.setInt(7, user.getUserId());
+        } else {
+            ps.setInt(6, user.getUserId());
+        }
+
+        int i = ps.executeUpdate();
+        return i > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+// 7. DELETE USER
+public boolean deleteUser(int id) {
+    try {
+        Connection con = DBConnection.createConnection();
+        String sql = "DELETE FROM USERS WHERE USER_ID=?";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, id);
+        int i = ps.executeUpdate();
+        return i > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+    
 }

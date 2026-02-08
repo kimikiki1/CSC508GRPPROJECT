@@ -13,77 +13,93 @@ import jakarta.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, 
-                 maxFileSize = 1024 * 1024 * 10, 
-                 maxRequestSize = 1024 * 1024 * 50)
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+                 maxFileSize = 1024 * 1024 * 10,      // 10MB
+                 maxRequestSize = 1024 * 1024 * 50)   // 50MB
 public class ReportStrayServlet extends HttpServlet {
 
-    // YOUR PATH (Double check this folder exists on your computer!)
+    // YOUR PATH (This matches your GitHub/OneDrive setup)
     private static final String UPLOAD_DIR = "C:\\Users\\USER\\OneDrive\\Documents\\GitHub\\CSC508GRPPROJECT\\images";
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         UserBean user = (UserBean) session.getAttribute("userSession");
 
-        if(user == null) {
+        // 1. Security Check
+        if (user == null) {
             response.sendRedirect("login.jsp");
             return;
         }
 
         try {
+            // 2. Create Bean and Populate Data
             StraysBean stray = new StraysBean();
             stray.setUserId(user.getUserId());
             stray.setPetType(request.getParameter("petType"));
             stray.setLocationFound(request.getParameter("location"));
-            stray.setDateFound(request.getParameter("dateFound"));
+            
+            // Handle Date (Ensure your Bean has setDateFound accepting String, or convert to java.sql.Date)
+            String dateStr = request.getParameter("dateFound");
+            if(dateStr != null && !dateStr.isEmpty()) {
+                stray.setDateFound(java.sql.Date.valueOf(dateStr)); 
+            } else {
+                stray.setDateFound(new java.sql.Date(System.currentTimeMillis()));
+            }
+            
             stray.setSituation(request.getParameter("situation"));
+            stray.setStatus("PENDING"); // Default status
 
-            // --- NEW SAFE FILE SAVING METHOD ---
+            // 3. FILE UPLOAD HANDLING
             Part filePart = request.getPart("petPhoto");
             String fileName = "no-image.jpg";
 
             if (filePart != null && filePart.getSize() > 0) {
-                // 1. Create a unique filename
-                fileName = System.currentTimeMillis() + "_" + getSubmittedFileName(filePart);
+                // A. Generate Unique Filename to prevent overwriting
+                String originalName = getSubmittedFileName(filePart);
+                fileName = System.currentTimeMillis() + "_" + originalName;
                 
-                // 2. Prepare the folder
+                // B. Create Directory if missing
                 File uploadDir = new File(UPLOAD_DIR);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
                 }
                 
-                // 3. FORCE SAVE using InputStream (Bypasses GlassFish path errors)
+                // C. Save File using NIO (More robust for OneDrive paths)
                 File file = new File(uploadDir, fileName);
                 try (InputStream input = filePart.getInputStream()) {
                     Files.copy(input, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
             }
-            // -----------------------------------
             
             stray.setPetPhoto(fileName); 
 
+            // 4. Save to Database
             StraysDao dao = new StraysDao();
-            String result = dao.addReport(stray);
+            String result = dao.addReport(stray); // Ensure your DAO has this method!
 
-            if(result.equals("SUCCESS")) {
-                request.setAttribute("msg", "Report Submitted Successfully!");
+            if ("SUCCESS".equals(result)) {
+                // Success - Redirect with message
+                String msg = URLEncoder.encode("Report submitted successfully!", "UTF-8");
+                response.sendRedirect("report_stray.jsp?msg=" + msg);
             } else {
-                request.setAttribute("msg", "DB ERROR: " + result);
+                // DB Failure
+                String err = URLEncoder.encode("Database Error: " + result, "UTF-8");
+                response.sendRedirect("report_stray.jsp?error=" + err);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            // This will show us if the path is still wrong
-            request.setAttribute("msg", "SAVE ERROR: " + e.getMessage());
+            // System/IO Failure
+            String err = URLEncoder.encode("System Error: " + e.getMessage(), "UTF-8");
+            response.sendRedirect("report_stray.jsp?error=" + err);
         }
-
-        request.getRequestDispatcher("report_stray.jsp").forward(request, response);
     }
 
-    // Helper method to safely get filename (Older browsers compatibility)
+    // Helper method to safely extract filename
     private String getSubmittedFileName(Part part) {
         for (String cd : part.getHeader("content-disposition").split(";")) {
             if (cd.trim().startsWith("filename")) {

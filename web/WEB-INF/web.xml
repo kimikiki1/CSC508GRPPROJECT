@@ -87,6 +87,15 @@
         <url-pattern>/ProcessAdoptionServlet</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>UpdateReportStatusServlet</servlet-name>
+        <servlet-class>com.petie.controller.UpdateReportStatusServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UpdateReportStatusServlet</servlet-name>
+        <url-pattern>/UpdateReportStatusServlet</url-pattern>
+    </servlet-mapping>
+
 
     <session-config>
         <session-timeout>

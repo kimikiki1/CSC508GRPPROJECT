@@ -1,20 +1,55 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.petie.bean.UserBean"%>
+<%@page import="com.petie.util.DBConnection"%>
+<%@page import="java.sql.*"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <%
-    // Check if user is logged in, redirect to login if not
+    // 1. Security Check
     UserBean user = (UserBean) session.getAttribute("userSession");
     if (user == null) { 
         response.sendRedirect("login.jsp"); 
         return; 
     }
     
-    // Set user attributes for JSTL usage
+    // Set attributes for JSTL
     pageContext.setAttribute("user", user);
     pageContext.setAttribute("userRole", user.getRole());
     pageContext.setAttribute("userName", user.getFullName());
+
+    // 2. FETCH LIVE STATS FROM DATABASE
+    int countAvailable = 0;
+    int countAdopted = 0;
+    int countReports = 0;
+
+    Connection con = null;
+    try {
+        con = DBConnection.createConnection();
+
+        // A. Count Available Pets (Status = 'IN_CENTRE')
+        String sql1 = "SELECT COUNT(*) FROM STRAY_REPORT WHERE STATUS = 'IN_CENTRE'";
+        PreparedStatement ps1 = con.prepareStatement(sql1);
+        ResultSet rs1 = ps1.executeQuery();
+        if(rs1.next()) countAvailable = rs1.getInt(1);
+
+        // B. Count Adopted Pets (Status = 'ADOPTED')
+        String sql2 = "SELECT COUNT(*) FROM STRAY_REPORT WHERE STATUS = 'ADOPTED'";
+        PreparedStatement ps2 = con.prepareStatement(sql2);
+        ResultSet rs2 = ps2.executeQuery();
+        if(rs2.next()) countAdopted = rs2.getInt(1);
+
+        // C. Count Total Reports Submitted (All Statuses)
+        String sql3 = "SELECT COUNT(*) FROM STRAY_REPORT";
+        PreparedStatement ps3 = con.prepareStatement(sql3);
+        ResultSet rs3 = ps3.executeQuery();
+        if(rs3.next()) countReports = rs3.getInt(1);
+
+    } catch(Exception e) {
+        e.printStackTrace();
+    } finally {
+        if(con != null) try { con.close(); } catch(Exception e) {}
+    }
 %>
 
 <!DOCTYPE html>
@@ -22,52 +57,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Petie Adoptie System</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Dashboard - Petie Adoptie</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Updated Color Variables for better balance */
+        /* --- THEME VARIABLES --- */
         :root {
-            --pet-primary: #4a90e2;      /* Keep blue but use sparingly */
-            --pet-secondary: #f39c12;    /* Orange accent */
-            --pet-success: #2ecc71;      /* Green */
-            --pet-danger: #e74c3c;       /* Red */
-            --pet-purple: #9b59b6;       /* Purple */
-            --pet-teal: #1abc9c;         /* Teal */
-            --pet-warm: #e67e22;         /* Warm orange */
-            --pet-light: #f8f9fa;        /* Light background */
-            --pet-dark: #34495e;         /* Dark slate */
-            --pet-gray: #95a5a6;         /* Gray */
+            --pet-primary: #4a90e2;       
+            --pet-secondary: #f39c12;    
+            --pet-success: #2ecc71;      
+            --pet-danger: #e74c3c;       
+            --pet-purple: #9b59b6;       
+            --pet-teal: #1abc9c;          
+            --pet-warm: #e67e22;          
+            --pet-light: #f8f9fa;         
+            --pet-dark: #34495e;          
+            --pet-gray: #95a5a6;          
+            --border-radius: 12px;
+            --box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --box-shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
         }
         
-        /* Fix for main content centering */
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f6f9; margin: 0; }
+
+        /* --- LAYOUT --- */
         .main-content {
             margin-left: 280px;
             transition: margin-left 0.3s ease;
-            padding: 20px;
+            padding: 30px;
             min-height: 100vh;
         }
         
-        /* When sidebar is collapsed */
-        .sidebar-container.collapsed ~ .main-content {
-            margin-left: 70px;
-        }
-        
-        /* On mobile, no margin */
-        @media (max-width: 992px) {
-            .main-content {
-                margin-left: 0 !important;
-            }
-        }
-        
-        /* Page-specific styles for dashboard */
-        .dashboard-container {
-            padding: 40px 0;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        /* Welcome Banner - Updated with balanced colors */
+        .dashboard-container { max-width: 1200px; margin: 0 auto; }
+
+        /* --- WELCOME BANNER --- */
         .welcome-banner {
             background: linear-gradient(135deg, #8E44AD 0%, #3498DB 100%);
             color: white;
@@ -75,115 +97,59 @@
             padding: 30px;
             margin-bottom: 40px;
             box-shadow: var(--box-shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             position: relative;
             overflow: hidden;
         }
         
         .welcome-banner::before {
-            content: "";
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 300%;
-            height: 200%;
+            content: ""; position: absolute; top: -50%; right: -50%; width: 300%; height: 200%;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-            opacity: 0.2;
-            animation: float 20s linear infinite;
+            background-size: 20px 20px; opacity: 0.2;
         }
         
-        @keyframes float {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        .welcome-text h1 { margin: 0; font-size: 1.8rem; position: relative; z-index: 1; }
+        .welcome-text p { margin: 5px 0 0; opacity: 0.9; position: relative; z-index: 1; }
         
-        .welcome-content {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 20px;
-            font-size: 36px;
-            border: 3px solid rgba(255,255,255,0.3);
-        }
-        
-        /* Quick Stats Cards - Color variety */
+        /* --- STATS CARDS --- */
         .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
             margin-bottom: 40px;
         }
         
         .stat-card {
             background: white;
             border-radius: var(--border-radius);
-            padding: 20px;
+            padding: 25px;
             box-shadow: var(--box-shadow);
             text-align: center;
-            transition: transform 0.3s ease;
-            border-top: 4px solid;
+            border-top: 4px solid #ddd;
+            transition: transform 0.2s;
         }
+        .stat-card:hover { transform: translateY(-5px); }
         
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--box-shadow-lg);
-        }
+        .stat-icon { font-size: 30px; margin-bottom: 10px; display: inline-block; padding: 15px; border-radius: 50%; }
+        .stat-number { font-size: 32px; font-weight: 700; color: var(--pet-dark); margin: 5px 0; }
+        .stat-label { color: var(--pet-gray); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Colors */
+        .sc-orange { border-color: var(--pet-secondary); }
+        .sc-orange .stat-icon { background: rgba(243, 156, 18, 0.1); color: var(--pet-secondary); }
         
-        .stat-card:nth-child(1) { border-top-color: var(--pet-secondary); }
-        .stat-card:nth-child(2) { border-top-color: var(--pet-success); }
-        .stat-card:nth-child(3) { border-top-color: var(--pet-purple); }
-        .stat-card:nth-child(4) { border-top-color: var(--pet-warm); }
+        .sc-green { border-color: var(--pet-success); }
+        .sc-green .stat-icon { background: rgba(46, 204, 113, 0.1); color: var(--pet-success); }
         
-        .stat-icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        
-        .stat-card:nth-child(1) .stat-icon { 
-            background: rgba(243, 156, 18, 0.1); 
-            color: var(--pet-secondary); 
-        }
-        .stat-card:nth-child(2) .stat-icon { 
-            background: rgba(46, 204, 113, 0.1); 
-            color: var(--pet-success); 
-        }
-        .stat-card:nth-child(3) .stat-icon { 
-            background: rgba(155, 89, 182, 0.1); 
-            color: var(--pet-purple); 
-        }
-        .stat-card:nth-child(4) .stat-icon { 
-            background: rgba(230, 126, 34, 0.1); 
-            color: var(--pet-warm); 
-        }
-        
-        .stat-number {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--pet-dark);
-            margin: 10px 0;
-        }
-        
-        .stat-label {
-            color: var(--pet-gray);
-            font-size: 14px;
-        }
-        
-        /* Feature Cards Grid - More color variety */
+        .sc-purple { border-color: var(--pet-purple); }
+        .sc-purple .stat-icon { background: rgba(155, 89, 182, 0.1); color: var(--pet-purple); }
+
+        /* --- FEATURES GRID (NAVIGATION LINKS) --- */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
             margin-bottom: 40px;
         }
@@ -191,698 +157,163 @@
         .feature-card {
             background: white;
             border-radius: var(--border-radius);
-            padding: 25px;
+            padding: 30px;
             box-shadow: var(--box-shadow);
-            transition: all 0.3s ease;
-            border-top: 4px solid;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            border-top: 4px solid #eee;
+            transition: all 0.3s;
         }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: var(--box-shadow-lg); }
         
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--box-shadow-lg);
-        }
+        .fc-icon { font-size: 40px; margin-bottom: 20px; }
+        .fc-title { font-size: 1.2rem; color: var(--pet-dark); margin-bottom: 10px; font-weight: 600; }
+        .fc-desc { color: #777; font-size: 0.9rem; margin-bottom: 20px; flex-grow: 1; }
         
-        .feature-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            text-align: center;
-            padding: 20px;
-            border-radius: 15px;
-            display: inline-block;
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
+        .btn-card {
+            padding: 10px 20px; border-radius: 20px; text-decoration: none;
+            color: white; font-weight: 600; font-size: 0.9rem; display: inline-block;
         }
+
+        /* Specific Card Styles */
+        .fc-report { border-color: var(--pet-danger); }
+        .fc-report .fc-icon { color: var(--pet-danger); }
+        .btn-report { background: var(--pet-danger); }
+
+        .fc-adopt { border-color: var(--pet-success); }
+        .fc-adopt .fc-icon { color: var(--pet-success); }
+        .btn-adopt { background: var(--pet-success); }
+
+        .fc-admin { border-color: var(--pet-dark); }
+        .fc-admin .fc-icon { color: var(--pet-dark); }
+        .btn-admin { background: var(--pet-dark); }
+
+        .fc-staff { border-color: var(--pet-warm); }
+        .fc-staff .fc-icon { color: var(--pet-warm); }
+        .btn-staff { background: var(--pet-warm); }
         
-        .feature-card h3 {
-            color: var(--pet-dark);
-            margin-bottom: 15px;
-            font-size: 20px;
+        .fc-blue { border-color: var(--pet-primary); }
+        .fc-blue .fc-icon { color: var(--pet-primary); }
+        .btn-blue { background: var(--pet-primary); }
+
+        /* Mobile */
+        @media (max-width: 992px) {
+            .main-content { margin-left: 0; }
         }
-        
-        .feature-card p {
-            color: var(--pet-gray);
-            margin-bottom: 20px;
-            flex-grow: 1;
-            line-height: 1.6;
-        }
-        
-        /* Different colors for different features */
-        .card-report { 
-            border-top-color: var(--pet-danger);
-            background: linear-gradient(to bottom right, white, #fef5f5);
-        }
-        .card-report .feature-icon {
-            background: rgba(231, 76, 60, 0.1);
-            color: var(--pet-danger);
-        }
-        
-        .card-adopt { 
-            border-top-color: var(--pet-success);
-            background: linear-gradient(to bottom right, white, #f5fef8);
-        }
-        .card-adopt .feature-icon {
-            background: rgba(46, 204, 113, 0.1);
-            color: var(--pet-success);
-        }
-        
-        .card-profile { 
-            border-top-color: var(--pet-purple);
-            background: linear-gradient(to bottom right, white, #f9f5ff);
-        }
-        .card-profile .feature-icon {
-            background: rgba(155, 89, 182, 0.1);
-            color: var(--pet-purple);
-        }
-        
-        .card-admin { 
-            border-top-color: var(--pet-dark);
-            background: linear-gradient(to bottom right, white, #f5f7fa);
-        }
-        .card-admin .feature-icon {
-            background: rgba(52, 73, 94, 0.1);
-            color: var(--pet-dark);
-        }
-        
-        .card-staff { 
-            border-top-color: var(--pet-warm);
-            background: linear-gradient(to bottom right, white, #fef9f5);
-        }
-        .card-staff .feature-icon {
-            background: rgba(230, 126, 34, 0.1);
-            color: var(--pet-warm);
-        }
-        
-        /* Button colors to match cards */
-        .btn-card-primary {
-            background: linear-gradient(135deg, var(--pet-primary) 0%, #357ae8 100%);
-            color: white;
-            border: none;
-        }
-        
-        .btn-card-danger {
-            background: linear-gradient(135deg, var(--pet-danger) 0%, #c0392b 100%);
-            color: white;
-            border: none;
-        }
-        
-        .btn-card-success {
-            background: linear-gradient(135deg, var(--pet-success) 0%, #27ae60 100%);
-            color: white;
-            border: none;
-        }
-        
-        .btn-card-purple {
-            background: linear-gradient(135deg, var(--pet-purple) 0%, #8e44ad 100%);
-            color: white;
-            border: none;
-        }
-        
-        .btn-card-dark {
-            background: linear-gradient(135deg, var(--pet-dark) 0%, #2c3e50 100%);
-            color: white;
-            border: none;
-        }
-        
-        .btn-card-warm {
-            background: linear-gradient(135deg, var(--pet-warm) 0%, #d35400 100%);
-            color: white;
-            border: none;
-        }
-        
-        /* Recent Activity */
-        .activity-container {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            box-shadow: var(--box-shadow);
-            margin-bottom: 40px;
-            border-left: 5px solid var(--pet-teal);
-        }
-        
-        .activity-list {
-            margin-top: 20px;
-        }
-        
-        .activity-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.2s;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-        
-        .activity-item:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .activity-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-        
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-size: 18px;
-        }
-        
-        .activity-login .activity-icon { background: rgba(52, 152, 219, 0.1); color: #3498db; }
-        .activity-view .activity-icon { background: rgba(155, 89, 182, 0.1); color: var(--pet-purple); }
-        .activity-report .activity-icon { background: rgba(231, 76, 60, 0.1); color: var(--pet-danger); }
-        .activity-application .activity-icon { background: rgba(46, 204, 113, 0.1); color: var(--pet-success); }
-        
-        /* Role Badge - More variety */
-        .role-badge {
-            display: inline-block;
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .badge-admin { 
-            background: linear-gradient(135deg, var(--pet-dark) 0%, #2c3e50 100%); 
-            color: white; 
-        }
-        .badge-staff { 
-            background: linear-gradient(135deg, var(--pet-warm) 0%, #d35400 100%); 
-            color: white; 
-        }
-        .badge-user { 
-            background: linear-gradient(135deg, var(--pet-success) 0%, #27ae60 100%); 
-            color: white; 
-        }
-        
-        /* Quick Tips Section */
-        .quick-tips {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: var(--border-radius);
-            padding: 25px;
-            text-align: center;
-            margin-bottom: 40px;
-            border-left: 5px solid var(--pet-secondary);
-        }
-        
-        .tip-items {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .tip-item {
-            background: white;
-            padding: 12px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            box-shadow: var(--box-shadow);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: transform 0.3s ease;
-        }
-        
-        .tip-item:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--box-shadow-lg);
-        }
-        
-        .tip-item:nth-child(1) { border-left: 3px solid var(--pet-primary); }
-        .tip-item:nth-child(2) { border-left: 3px solid var(--pet-success); }
-        .tip-item:nth-child(3) { border-left: 3px solid var(--pet-danger); }
-        
-        .tip-icon {
-            font-size: 16px;
-        }
-        
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .welcome-banner {
-                text-align: center;
-                padding: 20px;
-            }
-            
-            .user-avatar {
-                margin: 0 auto 15px;
-            }
-            
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .tip-items {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .tip-item {
-                width: 100%;
-                max-width: 300px;
-                justify-content: center;
-            }
-        }
-        
-        /* Add subtle animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .animate-fade-in-up {
-            animation: fadeInUp 0.5s ease forwards;
-        }
-        
-        .delay-1 { animation-delay: 0.1s; opacity: 0; }
-        .delay-2 { animation-delay: 0.2s; opacity: 0; }
-        .delay-3 { animation-delay: 0.3s; opacity: 0; }
-        .delay-4 { animation-delay: 0.4s; opacity: 0; }
-        .delay-5 { animation-delay: 0.5s; opacity: 0; }
     </style>
 </head>
 <body>
-    <!-- Include Navigation Sidebar -->
-    <%@include file="navbar.jsp" %>
+
+    <jsp:include page="navbar.jsp" />
     
-    <!-- Main Content Area -->
     <div class="main-content">
         <div class="dashboard-container">
-            <!-- Welcome Banner -->
-            <div class="welcome-banner animate-fade-in-up">
-                <div class="welcome-content" style="display: flex; align-items: center; flex-wrap: wrap;">
-                    <div class="user-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div style="flex: 1;">
-                        <h1 style="margin: 0 0 10px 0; color: white;">
-                            Welcome back, <span style="font-weight: 700;">${userName}</span>!
-                            <span class="role-badge badge-${userRole.toLowerCase()}">${userRole}</span>
-                        </h1>
-                        <p style="margin: 0; color: rgba(255,255,255,0.9);">
-                            <i class="far fa-calendar-alt"></i> 
-                            <jsp:useBean id="now" class="java.util.Date" />
-                            <fmt:formatDate value="${now}" pattern="EEEE, MMMM dd, yyyy" />
-                        </p>
-                        <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.8); font-size: 14px;">
-                            <i class="fas fa-heart"></i> Thank you for helping animals find loving homes
-                        </p>
-                    </div>
-                    <div style="text-align: right;">
-                        <a href="account_settings.jsp" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; backdrop-filter: blur(5px);">
-                            <i class="fas fa-cog"></i> Account Settings
-                        </a>
-                    </div>
+            
+            <div class="welcome-banner">
+                <div class="welcome-text">
+                    <h1>Welcome, ${userName}!</h1>
+                    <p>
+                        <i class="far fa-calendar-alt"></i> 
+                        <jsp:useBean id="now" class="java.util.Date" />
+                        <fmt:formatDate value="${now}" pattern="EEEE, MMMM dd, yyyy" />
+                    </p>
+                </div>
+                <div>
+                    <a href="account_settings.jsp" style="color: white; text-decoration: none; border: 1px solid white; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem;">
+                        <i class="fas fa-cog"></i> Settings
+                    </a>
                 </div>
             </div>
             
-            <!-- Quick Stats Section -->
             <div class="stats-container">
-                <div class="stat-card animate-fade-in-up delay-1">
-                    <div class="stat-icon">
-                        <i class="fas fa-paw"></i>
-                    </div>
-                    <div class="stat-number">12</div>
+                <div class="stat-card sc-orange">
+                    <div class="stat-icon"><i class="fas fa-paw"></i></div>
+                    <div class="stat-number"><%= countAvailable %></div>
                     <div class="stat-label">Available Pets</div>
                 </div>
                 
-                <div class="stat-card animate-fade-in-up delay-2">
-                    <div class="stat-icon">
-                        <i class="fas fa-home"></i>
-                    </div>
-                    <div class="stat-number">3</div>
-                    <div class="stat-label">Adopted This Month</div>
+                <div class="stat-card sc-green">
+                    <div class="stat-icon"><i class="fas fa-home"></i></div>
+                    <div class="stat-number"><%= countAdopted %></div>
+                    <div class="stat-label">Total Adoptions</div>
                 </div>
                 
-                <div class="stat-card animate-fade-in-up delay-3">
-                    <div class="stat-icon">
-                        <i class="fas fa-exclamation-circle"></i>
-                    </div>
-                    <div class="stat-number">5</div>
+                <div class="stat-card sc-purple">
+                    <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="stat-number"><%= countReports %></div>
                     <div class="stat-label">Reports Submitted</div>
                 </div>
-                
-                <div class="stat-card animate-fade-in-up delay-4">
-                    <div class="stat-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <div class="stat-number">48</div>
-                    <div class="stat-label">Happy Families</div>
-                </div>
             </div>
             
-            <!-- Features Grid -->
+            <h3 style="color: var(--pet-dark); margin-bottom: 20px;">Quick Actions</h3>
+
             <div class="features-grid">
-                <!-- Common Features for All Users -->
-                <div class="feature-card card-report animate-fade-in-up delay-1">
-                    <div class="feature-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <h3>Report a Stray</h3>
-                    <p>Found a stray animal in need? Report it with location, photos, and details so our rescue team can help.</p>
-                    <a href="report_stray.jsp" class="btn btn-card-danger">
-                        <i class="fas fa-plus-circle"></i> Submit Report
-                    </a>
-                </div>
-                
-                <div class="feature-card card-adopt animate-fade-in-up delay-2">
-                    <div class="feature-icon">
-                        <i class="fas fa-paw"></i>
-                    </div>
-                    <h3>Adopt a Pet</h3>
-                    <p>Browse our gallery of adorable pets waiting for their forever homes. Filter by type, age, or location.</p>
-                    <a href="adopt_me.jsp" class="btn btn-card-success">
-                        <i class="fas fa-search"></i> Browse Pets
-                    </a>
-                </div>
-                
-                <div class="feature-card card-profile animate-fade-in-up delay-3">
-                    <div class="feature-icon">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                    <h3>My Profile</h3>
-                    <p>Update your contact information, view your adoption history, and manage your account settings.</p>
-                    <a href="account_settings.jsp" class="btn btn-card-purple">
-                        <i class="fas fa-cog"></i> Manage Profile
-                    </a>
-                </div>
-                
-                <!-- ADMIN-ONLY Features -->
+
                 <c:if test="${userRole == 'ADMIN'}">
-                    <div class="feature-card card-admin animate-fade-in-up delay-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-user-shield"></i>
-                        </div>
-                        <h3>Admin Dashboard</h3>
-                        <p>Manage users, view system reports, configure settings, and oversee all platform activities.</p>
-                        <a href="admin_dashboard.jsp" class="btn btn-card-dark">
-                            <i class="fas fa-tachometer-alt"></i> Admin Panel
-                        </a>
+                    <div class="feature-card fc-admin">
+                        <i class="fas fa-users-cog fc-icon"></i>
+                        <div class="fc-title">Manage Users</div>
+                        <div class="fc-desc">View, edit, or remove user accounts and staff members.</div>
+                        <a href="manage_users.jsp" class="btn-card btn-admin">Go to Users</a>
+                    </div>
+
+                    <div class="feature-card fc-staff">
+                        <i class="fas fa-clipboard-check fc-icon"></i>
+                        <div class="fc-title">Process Reports</div>
+                        <div class="fc-desc">Review stray reports and finalize decisions (Centre/Foster).</div>
+                        <a href="admin_checklist.jsp" class="btn-card btn-staff">View Checklist</a>
                     </div>
                 </c:if>
-                
-                <!-- STAFF-ONLY Features -->
-                <c:if test="${userRole == 'STAFF' || userRole == 'ADMIN'}">
-                    <div class="feature-card card-staff animate-fade-in-up delay-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-clipboard-check"></i>
-                        </div>
-                        <h3>Manage Reports</h3>
-                        <p>Review and process stray reports, update status, and coordinate with rescue teams.</p>
-                        <a href="manage_reports.jsp" class="btn btn-card-warm">
-                            <i class="fas fa-tasks"></i> View Reports
-                        </a>
+
+                <c:if test="${userRole == 'STAFF'}">
+                    <div class="feature-card fc-staff">
+                        <i class="fas fa-clipboard-list fc-icon"></i>
+                        <div class="fc-title">Process Reports</div>
+                        <div class="fc-desc">Verify new stray reports and propose actions to Admin.</div>
+                        <a href="admin_checklist.jsp" class="btn-card btn-staff">Start Processing</a>
                     </div>
-                    
-                    <div class="feature-card animate-fade-in-up delay-5">
-                        <div class="feature-icon" style="background: rgba(26, 188, 156, 0.1); color: var(--pet-teal);">
-                            <i class="fas fa-dog"></i>
-                        </div>
-                        <h3>Pet Management</h3>
-                        <p>Add new pets for adoption, update medical records, and manage adoption applications.</p>
-                        <a href="manage_pets.jsp" class="btn btn-card-primary">
-                            <i class="fas fa-plus"></i> Add New Pet
-                        </a>
+
+                    <div class="feature-card fc-green">
+                        <i class="fas fa-heart fc-icon" style="color:var(--pet-success)"></i>
+                        <div class="fc-title">Manage Adoptions</div>
+                        <div class="fc-desc">Review adoption applications and approve pet matches.</div>
+                        <a href="manage_adoptions.jsp" class="btn-card btn-adopt">View Requests</a>
                     </div>
                 </c:if>
-                
-                <!-- Additional User Features -->
-                <div class="feature-card animate-fade-in-up delay-5">
-                    <div class="feature-icon" style="background: rgba(46, 204, 113, 0.1); color: var(--pet-success);">
-                        <i class="fas fa-heart"></i>
+
+                <c:if test="${userRole == 'USER'}">
+                    <div class="feature-card fc-adopt">
+                        <i class="fas fa-paw fc-icon"></i>
+                        <div class="fc-title">Adopt a Pet</div>
+                        <div class="fc-desc">Browse our gallery of pets looking for a forever home.</div>
+                        <a href="adopt_me.jsp" class="btn-card btn-adopt">Browse Pets</a>
                     </div>
-                    <h3>My Applications</h3>
-                    <p>Track the status of your adoption applications and see scheduled meet-and-greets.</p>
-                    <a href="my_applications.jsp" class="btn btn-card-success">
-                        <i class="fas fa-file-alt"></i> View Applications
-                    </a>
-                </div>
-                
-                <div class="feature-card animate-fade-in-up delay-5">
-                    <div class="feature-icon" style="background: rgba(52, 152, 219, 0.1); color: #3498db;">
-                        <i class="fas fa-comments"></i>
+
+                    <div class="feature-card fc-report">
+                        <i class="fas fa-exclamation-triangle fc-icon"></i>
+                        <div class="fc-title">Report a Stray</div>
+                        <div class="fc-desc">Found an animal in need? Let us know the location and details.</div>
+                        <a href="report_stray.jsp" class="btn-card btn-report">Submit Report</a>
                     </div>
-                    <h3>Help & Support</h3>
-                    <p>Get help with the adoption process, report issues, or contact our support team.</p>
-                    <a href="help.jsp" class="btn btn-card-primary">
-                        <i class="fas fa-question-circle"></i> Get Help
-                    </a>
+
+                    <div class="feature-card fc-blue">
+                        <i class="fas fa-file-invoice fc-icon"></i>
+                        <div class="fc-title">My Activity</div>
+                        <div class="fc-desc">Check status of your stray reports and adoption applications.</div>
+                        <a href="my_reports.jsp" class="btn-card btn-blue">View Activity</a>
+                    </div>
+                </c:if>
+
+                <div class="feature-card fc-purple" style="border-color: var(--pet-purple);">
+                    <i class="fas fa-user-circle fc-icon" style="color: var(--pet-purple);"></i>
+                    <div class="fc-title">My Profile</div>
+                    <div class="fc-desc">Update your personal details and account settings.</div>
+                    <a href="account_settings.jsp" class="btn-card" style="background: var(--pet-purple);">Manage Profile</a>
                 </div>
+
             </div>
             
-            <!-- Recent Activity Section -->
-            <div class="activity-container animate-fade-in-up">
-                <h2 style="color: var(--pet-dark); margin-bottom: 10px;">
-                    <i class="fas fa-history"></i> Recent Activity
-                </h2>
-                <p style="color: var(--pet-gray);">Your recent actions on the platform</p>
-                
-                <div class="activity-list">
-                    <div class="activity-item activity-login">
-                        <div class="activity-icon">
-                            <i class="fas fa-sign-in-alt"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <strong>Logged in</strong>
-                            <div style="color: var(--pet-gray); font-size: 13px;">
-                                <fmt:formatDate value="${now}" pattern="hh:mm a" />
-                                • Just now
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item activity-view">
-                        <div class="activity-icon">
-                            <i class="fas fa-paw"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <strong>Viewed pet profile: "Max"</strong>
-                            <div style="color: var(--pet-gray); font-size: 13px;">
-                                Yesterday • 3:45 PM
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item activity-report">
-                        <div class="activity-icon">
-                            <i class="fas fa-exclamation-circle"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <strong>Submitted stray report #R-024</strong>
-                            <div style="color: var(--pet-gray); font-size: 13px;">
-                                March 15, 2024 • Status: Under Review
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item activity-application">
-                        <div class="activity-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <strong>Adoption application submitted</strong>
-                            <div style="color: var(--pet-gray); font-size: 13px;">
-                                March 10, 2024 • For: Luna (Cat)
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="text-align: center; margin-top: 20px;">
-                    <a href="activity_log.jsp" class="link" style="color: var(--pet-teal);">
-                        <i class="fas fa-list"></i> View All Activity
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Quick Tips Section -->
-            <div class="quick-tips animate-fade-in-up">
-                <h3 style="color: var(--pet-dark); margin-bottom: 15px;">
-                    <i class="fas fa-lightbulb"></i> Quick Tips
-                </h3>
-                <div class="tip-items">
-                    <div class="tip-item">
-                        <i class="fas fa-camera tip-icon" style="color: var(--pet-primary);"></i>
-                        Add clear photos when reporting strays
-                    </div>
-                    <div class="tip-item">
-                        <i class="fas fa-home tip-icon" style="color: var(--pet-success);"></i>
-                        Prepare your home before adopting
-                    </div>
-                    <div class="tip-item">
-                        <i class="fas fa-phone tip-icon" style="color: var(--pet-danger);"></i>
-                        Keep your contact info updated
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
-    
-    <!-- JavaScript for Interactive Elements -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Update greeting based on time of day
-            updateGreeting();
-            
-            function updateGreeting() {
-                const hour = new Date().getHours();
-                let greeting = "Good ";
-                
-                if (hour < 12) greeting += "morning";
-                else if (hour < 18) greeting += "afternoon";
-                else greeting += "evening";
-                
-                // Optional: Update the welcome message
-                // const welcomeHeader = document.querySelector('.welcome-banner h1');
-                // if (welcomeHeader) {
-                //     welcomeHeader.innerHTML = `${greeting}, <span style="font-weight: 700;">${"<%= user.getFullName() %>"}</span>!`;
-                // }
-            }
-            
-            // Add hover effects to cards
-            const cards = document.querySelectorAll('.stat-card, .feature-card');
-            cards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.zIndex = '10';
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    this.style.zIndex = '';
-                });
-            });
-            
-            // Animate elements on scroll
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-            
-            const observer = new IntersectionObserver(function(entries) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, observerOptions);
-            
-            // Observe all animated elements
-            document.querySelectorAll('.animate-fade-in-up').forEach(el => {
-                observer.observe(el);
-            });
-            
-            // Sync sidebar state with main content margin
-            const sidebar = document.querySelector('.sidebar-container');
-            const mainContent = document.querySelector('.main-content');
-            
-            function updateContentMargin() {
-                if (sidebar && mainContent) {
-                    if (window.innerWidth > 992) {
-                        if (sidebar.classList.contains('collapsed')) {
-                            mainContent.style.marginLeft = '70px';
-                        } else {
-                            mainContent.style.marginLeft = '280px';
-                        }
-                    } else {
-                        mainContent.style.marginLeft = '0';
-                    }
-                }
-            }
-            
-            // Listen for sidebar toggle events
-            const originalToggle = document.querySelector('.toggle-btn');
-            if (originalToggle) {
-                originalToggle.addEventListener('click', function() {
-                    setTimeout(updateContentMargin, 300); // Wait for transition
-                });
-            }
-            
-            // Initial margin setup
-            updateContentMargin();
-            
-            // Update on window resize
-            window.addEventListener('resize', updateContentMargin);
-        });
-        
-        // Listen for sidebar toggle events
-window.addEventListener('sidebarToggle', function(e) {
-    const sidebarCollapsed = e.detail.collapsed;
-    const mainContent = document.querySelector('.main-content');
-    
-    if (mainContent) {
-        if (sidebarCollapsed) {
-            mainContent.style.marginLeft = '70px';
-            mainContent.style.width = 'calc(100% - 70px)';
-        } else {
-            mainContent.style.marginLeft = '280px';
-            mainContent.style.width = 'calc(100% - 280px)';
-        }
-    }
-});
 
-// Initial setup
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebar = document.querySelector('.sidebar-container');
-    const mainContent = document.querySelector('.main-content');
-    
-    if (sidebar && mainContent) {
-        if (sidebar.classList.contains('collapsed')) {
-            mainContent.style.marginLeft = '70px';
-            mainContent.style.width = 'calc(100% - 70px)';
-        } else {
-            mainContent.style.marginLeft = '280px';
-            mainContent.style.width = 'calc(100% - 280px)';
-        }
-    }
-    
-    // Mobile check
-    if (window.innerWidth <= 992) {
-        if (mainContent) {
-            mainContent.style.marginLeft = '0';
-            mainContent.style.width = '100%';
-        }
-    }
-});
-
-// Handle window resize
-window.addEventListener('resize', function() {
-    const mainContent = document.querySelector('.main-content');
-    
-    if (mainContent) {
-        if (window.innerWidth <= 992) {
-            mainContent.style.marginLeft = '0';
-            mainContent.style.width = '100%';
-        } else {
-            const sidebar = document.querySelector('.sidebar-container');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '70px';
-                mainContent.style.width = 'calc(100% - 70px)';
-            } else {
-                mainContent.style.marginLeft = '280px';
-                mainContent.style.width = 'calc(100% - 280px)';
-            }
-        }
-    }
-});
-    </script>
 </body>
 </html>

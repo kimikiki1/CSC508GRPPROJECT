@@ -1,27 +1,32 @@
 package com.petie.bean;
+
 import java.io.Serializable;
+import java.sql.Date; // Imported for Date handling
 
 public class StraysBean implements Serializable {
     
-    // 1. CHANGED: Renamed to match Database Column 'STRAY_ID'
+    // 1. IDs
     private int strayId;  
-    
     private int userId;    
+    
+    // 2. Data Fields
     private String petType;
     private String locationFound;
     private String petPhoto;
-    private String dateFound;
     private String situation;
     private String status;
     
-    // 2. This stores the reporter's Full Name (fetched via JOIN)
+    // CHANGED: Changed from String to java.sql.Date to match Database/Servlet
+    private Date dateFound; 
+    
+    // 3. Extra Field (For displaying reporter name in lists)
     private String reporterName; 
 
+    // Constructor
     public StraysBean() {}
 
     // --- GETTERS AND SETTERS ---
 
-    // Updated ID Getter/Setter
     public int getStrayId() { return strayId; }
     public void setStrayId(int strayId) { this.strayId = strayId; }
 
@@ -37,8 +42,9 @@ public class StraysBean implements Serializable {
     public String getPetPhoto() { return petPhoto; }
     public void setPetPhoto(String petPhoto) { this.petPhoto = petPhoto; }
 
-    public String getDateFound() { return dateFound; }
-    public void setDateFound(String dateFound) { this.dateFound = dateFound; }
+    // Updated Date Getter/Setter to use java.sql.Date
+    public Date getDateFound() { return dateFound; }
+    public void setDateFound(Date dateFound) { this.dateFound = dateFound; }
 
     public String getSituation() { return situation; }
     public void setSituation(String situation) { this.situation = situation; }
@@ -46,7 +52,6 @@ public class StraysBean implements Serializable {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    // Reporter Name Getter/Setter
     public String getReporterName() { return reporterName; }
     public void setReporterName(String reporterName) { this.reporterName = reporterName; }
 }

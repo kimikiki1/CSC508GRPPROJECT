@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.petie.bean.UserBean"%>
+<%@page import="com.petie.bean.StatsBean"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
@@ -11,10 +12,14 @@
         return; 
     }
     
-    // Set user attributes for JSTL usage
+    // Fetch statistics from database
+    StatsBean stats = new StatsBean(user.getUserId(), user.getRole());
+    
+    // Set attributes for JSTL
     pageContext.setAttribute("user", user);
     pageContext.setAttribute("userRole", user.getRole());
     pageContext.setAttribute("userName", user.getFullName());
+    pageContext.setAttribute("stats", stats);
 %>
 
 <!DOCTYPE html>
@@ -521,7 +526,7 @@
                     <div class="stat-icon">
                         <i class="fas fa-paw"></i>
                     </div>
-                    <div class="stat-number">12</div>
+                    <div class="stat-number">${stats.availablePets}</div>
                     <div class="stat-label">Available Pets</div>
                 </div>
                 
@@ -529,7 +534,7 @@
                     <div class="stat-icon">
                         <i class="fas fa-home"></i>
                     </div>
-                    <div class="stat-number">3</div>
+                    <div class="stat-number">${stats.adoptedThisMonth}</div>
                     <div class="stat-label">Adopted This Month</div>
                 </div>
                 
@@ -537,7 +542,7 @@
                     <div class="stat-icon">
                         <i class="fas fa-exclamation-circle"></i>
                     </div>
-                    <div class="stat-number">5</div>
+                    <div class="stat-number">${stats.reportsSubmitted}</div>
                     <div class="stat-label">Reports Submitted</div>
                 </div>
                 
@@ -545,7 +550,7 @@
                     <div class="stat-icon">
                         <i class="fas fa-heart"></i>
                     </div>
-                    <div class="stat-number">48</div>
+                    <div class="stat-number">${stats.happyFamilies}</div>
                     <div class="stat-label">Happy Families</div>
                 </div>
             </div>
@@ -822,67 +827,6 @@
             // Update on window resize
             window.addEventListener('resize', updateContentMargin);
         });
-        
-        // Listen for sidebar toggle events
-window.addEventListener('sidebarToggle', function(e) {
-    const sidebarCollapsed = e.detail.collapsed;
-    const mainContent = document.querySelector('.main-content');
-    
-    if (mainContent) {
-        if (sidebarCollapsed) {
-            mainContent.style.marginLeft = '70px';
-            mainContent.style.width = 'calc(100% - 70px)';
-        } else {
-            mainContent.style.marginLeft = '280px';
-            mainContent.style.width = 'calc(100% - 280px)';
-        }
-    }
-});
-
-// Initial setup
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebar = document.querySelector('.sidebar-container');
-    const mainContent = document.querySelector('.main-content');
-    
-    if (sidebar && mainContent) {
-        if (sidebar.classList.contains('collapsed')) {
-            mainContent.style.marginLeft = '70px';
-            mainContent.style.width = 'calc(100% - 70px)';
-        } else {
-            mainContent.style.marginLeft = '280px';
-            mainContent.style.width = 'calc(100% - 280px)';
-        }
-    }
-    
-    // Mobile check
-    if (window.innerWidth <= 992) {
-        if (mainContent) {
-            mainContent.style.marginLeft = '0';
-            mainContent.style.width = '100%';
-        }
-    }
-});
-
-// Handle window resize
-window.addEventListener('resize', function() {
-    const mainContent = document.querySelector('.main-content');
-    
-    if (mainContent) {
-        if (window.innerWidth <= 992) {
-            mainContent.style.marginLeft = '0';
-            mainContent.style.width = '100%';
-        } else {
-            const sidebar = document.querySelector('.sidebar-container');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '70px';
-                mainContent.style.width = 'calc(100% - 70px)';
-            } else {
-                mainContent.style.marginLeft = '280px';
-                mainContent.style.width = 'calc(100% - 280px)';
-            }
-        }
-    }
-});
     </script>
 </body>
 </html>

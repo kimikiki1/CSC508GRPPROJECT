@@ -156,8 +156,8 @@
         }
         
         .filter-btn {
-            background: var(--light-gray);
-            color: black;
+            background: var(--pet-primary);
+            color: white;
             border: none;
             padding: 10px 20px;
             border-radius: 8px;
@@ -170,7 +170,7 @@
         }
         
         .filter-btn:hover {
-            background: #dee2e6;
+            background: #357ae8;
             transform: translateY(-2px);
         }
         
@@ -306,6 +306,10 @@
         
         .pet-status.urgent {
             background: var(--pet-danger);
+        }
+        
+        .pet-status.adopted {
+            background: var(--pet-dark);
         }
         
         .pet-info {
@@ -498,6 +502,191 @@
             width: 100% !important;
             max-width: 100% !important;
         }
+        
+        /* Modal Styles - Enhanced */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--box-shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .close-modal {
+            float: right;
+            cursor: pointer;
+            font-size: 28px;
+            color: var(--pet-gray);
+            transition: color 0.3s;
+            line-height: 1;
+        }
+        
+        .close-modal:hover {
+            color: var(--pet-danger);
+        }
+        
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--pet-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-content .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .modal-content label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--pet-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .modal-content textarea,
+        .modal-content select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--light-gray);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .modal-content textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .modal-content textarea:focus,
+        .modal-content select:focus {
+            outline: none;
+            border-color: var(--pet-primary);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--pet-primary) 0%, #357ae8 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #357ae8 0%, #2c6fd8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--pet-dark);
+            border: 2px solid var(--light-gray);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--pet-gray);
+            background: #f8f9fa;
+        }
+        
+        .alert-error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* CSS Variables - Add at top if not already present */
+        :root {
+            --pet-primary: #4a90e2;
+            --pet-secondary: #2ecc71;
+            --pet-danger: #e74c3c;
+            --pet-warning: #f39c12;
+            --pet-info: #3498db;
+            --pet-dark: #2c3e50;
+            --pet-gray: #7f8c8d;
+            --light-gray: #ecf0f1;
+            --border-radius: 10px;
+            --box-shadow-sm: 0 2px 5px rgba(0,0,0,0.1);
+            --box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            --box-shadow-lg: 0 8px 20px rgba(0,0,0,0.15);
+        }
     </style>
 </head>
 <body>
@@ -585,38 +774,6 @@
                         <i class="fas fa-redo"></i> Reset
                     </button>
                 </div>
-
-    <jsp:include page="navbar.jsp" />
-
-    <h1 style="text-align:center; margin-top: 30px; color: #003366;">Find Your New Best Friend 🐶🐱</h1>
-
-    <div class="gallery">
-        <%
-            Connection con = null;
-            try {
-                con = DBConnection.createConnection();
-                // Select all reports
-                String sql = "SELECT * FROM STRAY_REPORT WHERE STATUS = 'IN_CENTRE'";
-                PreparedStatement ps = con.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery();
-
-                while(rs.next()) {
-                    String type = rs.getString("PET_TYPE");
-                    String location = rs.getString("LOCATION_FOUND");
-                    String situation = rs.getString("SITUATION");
-                    String date = rs.getString("DATE_FOUND");
-                    String photo = rs.getString("PET_PHOTO"); 
-        %>
-            <div class="pet-card">
-                <img src="images/<%= photo %>" class="pet-img" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
-                
-                <div class="pet-info">
-                    <div class="pet-name"><%= type %></div>
-                    <div class="pet-details">📍 Location: <%= location %></div>
-                    <div class="pet-details">📅 Found: <%= date %></div>
-                    <div class="pet-details">📝 Situation: <%= situation %></div>
-                </div>
-                <a href="RequestAdoptionServlet?id=<%= rs.getInt("STRAY_ID") %>" class="adopt-btn">Request to Adopt</a>
             </div>
             
             <!-- Pets Grid -->
@@ -626,8 +783,8 @@
                     int petCount = 0;
                     try {
                         con = DBConnection.createConnection();
-                        // Select all stray reports that are available for adoption
-                        String sql = "SELECT * FROM STRAY_REPORT WHERE STATUS = 'PENDING' OR STATUS = 'AVAILABLE' ORDER BY DATE_FOUND DESC"; 
+                        // Updated query to show only AVAILABLE pets for adoption
+                        String sql = "SELECT * FROM STRAY_REPORT WHERE STATUS = 'AVAILABLE' ORDER BY DATE_FOUND DESC"; 
                         PreparedStatement ps = con.prepareStatement(sql);
                         ResultSet rs = ps.executeQuery();
                         
@@ -662,6 +819,9 @@
                             } else if ("AVAILABLE".equals(status)) {
                                 statusClass = "rescued";
                                 statusText = "Ready for Adoption";
+                            } else if ("ADOPTED".equals(status)) {
+                                statusClass = "adopted";
+                                statusText = "Already Adopted";
                             }
                             
                             // Truncate situation if too long
@@ -670,7 +830,7 @@
                                 shortSituation = situation.substring(0, 150) + "...";
                             }
                 %>
-                <div class="pet-card" data-type="<%= type %>" data-location="<%= location %>" data-status="<%= status %>">
+                <div class="pet-card" data-type="<%= type %>" data-location="<%= location %>" data-status="<%= status %>" data-stray-id="<%= strayId %>">
                     <div class="pet-image-container">
                         <img src="uploads/<%= (photo != null && !photo.isEmpty()) ? photo : "default-pet.jpg" %>" 
                              class="pet-image" 
@@ -681,7 +841,7 @@
                     
                     <div class="pet-info">
                         <div class="pet-name">
-                            <i class="fas fa-dog pet-type-icon"></i>
+                            <i class="fas fa-<%= "Dog".equalsIgnoreCase(type) ? "dog" : "Cat".equalsIgnoreCase(type) ? "cat" : "Rabbit".equalsIgnoreCase(type) ? "rabbit" : "Bird".equalsIgnoreCase(type) ? "dove" : "paw" %> pet-type-icon"></i>
                             <%= type %>
                         </div>
                         
@@ -697,7 +857,7 @@
                         
                         <div class="pet-details">
                             <i class="fas fa-info-circle pet-detail-icon"></i>
-                            <span>Condition: <%= status %></span>
+                            <span>Status: <%= statusText %></span>
                         </div>
                         
                         <p class="pet-description">
@@ -708,7 +868,7 @@
                             <span class="pet-date">Report ID: #<%= strayId %></span>
                             
                             <% if ("AVAILABLE".equals(status) || "PENDING".equals(status)) { %>
-                                <button class="adopt-btn" onclick="showAdoptionModal(<%= strayId %>, '<%= type %>')">
+                                <button class="adopt-btn" onclick="showAdoptionModal('<%= strayId %>', '<%= type %>')">
                                     <i class="fas fa-heart"></i> Adopt Me
                                 </button>
                             <% } else { %>
@@ -753,23 +913,49 @@
         </div>
     </div>
     
-    <!-- Adoption Modal (Hidden by default) -->
+    <!-- Adoption Modal -->
     <div id="adoptionModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>Adoption Application</h3>
-            <p id="modalPetInfo"></p>
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3><i class="fas fa-heart"></i> Adoption Application</h3>
+            <div id="modalPetInfo"></div>
             <form id="adoptionForm">
+                <input type="hidden" id="strayIdInput" name="strayId">
+                <input type="hidden" id="petTypeInput" name="petType">
+                <input type="hidden" id="userIdInput" name="userId" value="<%= user.getUserId() %>">
+                
                 <div class="form-group">
-                    <label>Why do you want to adopt this pet?</label>
-                    <textarea rows="4" required></textarea>
+                    <label for="reason"><i class="fas fa-question-circle"></i> Why do you want to adopt this pet?</label>
+                    <textarea id="reason" name="reason" rows="4" required placeholder="Tell us why you would be a good pet parent..."></textarea>
                 </div>
+                
                 <div class="form-group">
-                    <label>Do you have experience with pets?</label>
-                    <textarea rows="3" required></textarea>
+                    <label for="experience"><i class="fas fa-graduation-cap"></i> Do you have experience with pets?</label>
+                    <textarea id="experience" name="experience" rows="3" required placeholder="Describe your experience with pets..."></textarea>
                 </div>
+                
+                <div class="form-group">
+                    <label for="livingSituation"><i class="fas fa-home"></i> Describe your living situation</label>
+                    <textarea id="livingSituation" name="livingSituation" rows="3" required placeholder="House/apartment, yard, other pets, etc..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contactPreference"><i class="fas fa-phone"></i> Contact Preference</label>
+                    <select id="contactPreference" name="contactPreference" class="form-control" required>
+                        <option value="">Select preferred contact method</option>
+                        <option value="PHONE">Phone Call</option>
+                        <option value="EMAIL">Email</option>
+                        <option value="WHATSAPP">WhatsApp</option>
+                    </select>
+                </div>
+                
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitAdoptionBtn">
+                        <i class="fas fa-paper-plane"></i> Submit Application
+                    </button>
                 </div>
             </form>
         </div>
@@ -977,44 +1163,88 @@
                 }
             }
             
-            // Adoption modal functions
-            window.showAdoptionModal = function(strayId, petType) {
-                const modal = document.getElementById('adoptionModal');
-                const petInfo = document.getElementById('modalPetInfo');
-                
-                petInfo.textContent = `You're applying to adopt a ${petType} (Report ID: #${strayId}). Please fill out the application form below.`;
-                
-                modal.style.display = 'block';
-                
-                // Store current pet info for form submission
-                modal.dataset.strayId = strayId;
-                modal.dataset.petType = petType;
-            };
-            
-            window.closeModal = function() {
-                document.getElementById('adoptionModal').style.display = 'none';
-            };
-            
-            // Handle adoption form submission
+            // Adoption form submission
             document.getElementById('adoptionForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                const modal = document.getElementById('adoptionModal');
-                const strayId = modal.dataset.strayId;
-                const petType = modal.dataset.petType;
+                const submitBtn = document.getElementById('submitAdoptionBtn');
+                const originalText = submitBtn.innerHTML;
                 
-                // In a real application, you would submit this to a servlet
-                alert(`Thank you for your application to adopt the ${petType}! Our team will contact you within 2-3 business days.`);
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
                 
-                // Close modal
-                closeModal();
+                // Get form data
+                const formData = new FormData(this);
+                const strayId = formData.get('strayId');
+                const petType = formData.get('petType');
                 
-                // Update button status (in a real app, this would be done via AJAX)
-                const adoptBtn = document.querySelector(`.pet-card[data-stray-id="${strayId}"] .adopt-btn`);
-                if (adoptBtn) {
-                    adoptBtn.disabled = true;
-                    adoptBtn.innerHTML = '<i class="fas fa-check"></i> Application Submitted';
-                }
+                // Submit via AJAX
+                fetch('AdoptPetServlet', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showSuccessMessage(`
+                            <div style="text-align: center; padding: 20px;">
+                                <div style="font-size: 48px; color: var(--pet-success); margin-bottom: 15px;">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <h3 style="color: var(--pet-dark); margin-bottom: 10px;">
+                                    Adoption Application Submitted Successfully!
+                                </h3>
+                                <p style="color: var(--pet-gray); margin-bottom: 20px;">
+                                    Thank you for your interest in adopting a ${petType}. 
+                                    Our team will review your application and contact you soon.
+                                </p>
+                                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                                    <button onclick="closeModal()" class="btn btn-secondary">
+                                        Close
+                                    </button>
+                                    <a href="my_applications.jsp" class="btn btn-primary">
+                                        <i class="fas fa-list"></i> View My Applications
+                                    </a>
+                                </div>
+                            </div>
+                        `);
+                        
+                        // Update the pet card button
+                        const adoptBtn = document.querySelector(`.pet-card[data-stray-id="${strayId}"] .adopt-btn`);
+                        if (adoptBtn) {
+                            adoptBtn.disabled = true;
+                            adoptBtn.innerHTML = '<i class="fas fa-check"></i> Application Submitted';
+                            adoptBtn.classList.remove('adopt-btn');
+                            adoptBtn.classList.add('btn', 'btn-secondary');
+                            adoptBtn.style.cursor = 'default';
+                            adoptBtn.onclick = null;
+                            
+                            // Update status on card
+                            const statusBadge = document.querySelector(`.pet-card[data-stray-id="${strayId}"] .pet-status`);
+                            if (statusBadge) {
+                                statusBadge.textContent = 'Application Pending';
+                                statusBadge.className = 'pet-status pending';
+                            }
+                        }
+                        
+                        // Update pet count
+                        setTimeout(updatePetStats, 500);
+                        
+                    } else {
+                        // Show error message
+                        showErrorMessage(data.message || 'Failed to submit adoption application. Please try again.');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showErrorMessage('An error occurred. Please try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                });
             });
             
             // Close modal when clicking outside
@@ -1026,140 +1256,78 @@
             });
         });
         
-        // Listen for sidebar toggle events
-window.addEventListener('sidebarToggle', function(e) {
-    const sidebarCollapsed = e.detail.collapsed;
-    const mainContent = document.querySelector('.main-content');
-    
-    if (mainContent) {
-        if (sidebarCollapsed) {
-            mainContent.style.marginLeft = '70px';
-            mainContent.style.width = 'calc(100% - 70px)';
-        } else {
-            mainContent.style.marginLeft = '280px';
-            mainContent.style.width = 'calc(100% - 280px)';
+        // Adoption modal functions
+        function showAdoptionModal(strayId, petType) {
+            const modal = document.getElementById('adoptionModal');
+            const petInfo = document.getElementById('modalPetInfo');
+            
+            // Set the hidden inputs
+            document.getElementById('strayIdInput').value = strayId;
+            document.getElementById('petTypeInput').value = petType;
+            
+            petInfo.innerHTML = `
+                <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin: 0 0 10px 0; color: var(--pet-primary);">
+                        <i class="fas fa-paw"></i> You're applying to adopt a ${petType}
+                    </h4>
+                    <p style="margin: 5px 0; color: var(--pet-dark);">
+                        <strong>Report ID:</strong> #${strayId}
+                    </p>
+                    <p style="margin: 5px 0; color: var(--pet-dark);">
+                        <strong>Applicant:</strong> <%= user.getFullName() %>
+                    </p>
+                </div>
+                <p style="color: var(--pet-gray);">
+                    Please fill out the application form below. Our team will review your application 
+                    and contact you within 2-3 business days.
+                </p>
+            `;
+            
+            modal.style.display = 'flex';
+            
+            // Reset form
+            document.getElementById('adoptionForm').reset();
         }
-    }
-});
-
-// Initial setup
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebar = document.querySelector('.sidebar-container');
-    const mainContent = document.querySelector('.main-content');
-    
-    if (sidebar && mainContent) {
-        if (sidebar.classList.contains('collapsed')) {
-            mainContent.style.marginLeft = '70px';
-            mainContent.style.width = 'calc(100% - 70px)';
-        } else {
-            mainContent.style.marginLeft = '280px';
-            mainContent.style.width = 'calc(100% - 280px)';
+        
+        function closeModal() {
+            document.getElementById('adoptionModal').style.display = 'none';
+            // Reset form
+            document.getElementById('adoptionForm').reset();
+            // Reset modal content
+            document.getElementById('modalPetInfo').innerHTML = '';
         }
-    }
-    
-    // Mobile check
-    if (window.innerWidth <= 992) {
-        if (mainContent) {
-            mainContent.style.marginLeft = '0';
-            mainContent.style.width = '100%';
+        
+        // Helper function to show success message
+        function showSuccessMessage(content) {
+            const form = document.getElementById('adoptionForm');
+            const petInfo = document.getElementById('modalPetInfo');
+            
+            form.style.display = 'none';
+            petInfo.innerHTML = content;
         }
-    }
-});
-
-// Handle window resize
-window.addEventListener('resize', function() {
-    const mainContent = document.querySelector('.main-content');
-    
-    if (mainContent) {
-        if (window.innerWidth <= 992) {
-            mainContent.style.marginLeft = '0';
-            mainContent.style.width = '100%';
-        } else {
-            const sidebar = document.querySelector('.sidebar-container');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '70px';
-                mainContent.style.width = 'calc(100% - 70px)';
-            } else {
-                mainContent.style.marginLeft = '280px';
-                mainContent.style.width = 'calc(100% - 280px)';
+        
+        // Helper function to show error message
+        function showErrorMessage(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-error';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+            errorDiv.style.marginTop = '15px';
+            
+            const form = document.getElementById('adoptionForm');
+            const existingError = form.querySelector('.alert-error');
+            
+            if (existingError) {
+                existingError.remove();
             }
-        }
-    }
-});
-    </script>
-    
-    <!-- Modal Styles -->
-    <style>
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: var(--border-radius);
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-content h3 {
-            margin-top: 0;
-            color: var(--pet-dark);
-        }
-        
-        .modal-content .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .modal-content label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--pet-dark);
-        }
-        
-        .modal-content textarea {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid var(--light-gray);
-            border-radius: 8px;
-            font-family: inherit;
-            resize: vertical;
-        }
-        
-        .modal-content textarea:focus {
-            outline: none;
-            border-color: var(--pet-primary);
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-    </style>
-<script>
-        // Check URL for messages
-        const urlParams = new URLSearchParams(window.location.search);
-        const msg = urlParams.get('msg');
-        
-        if (msg === 'duplicate') {
-            alert("⚠️ You have already requested to adopt this pet! Please wait for Staff approval.");
-        } else if (msg === 'success') {
-            alert("✅ Request Sent! Staff will review your application.");
+            
+            form.insertBefore(errorDiv, form.firstChild);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 5000);
         }
     </script>
 </body>

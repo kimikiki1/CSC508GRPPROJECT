@@ -1,12 +1,3 @@
-<%-- 
-    report_stray.jsp - Report Stray Animal Page
-    Features:
-    - Form to report stray animals with photo upload
-    - Validation and user-friendly interface
-    - Integration with sidebar navigation
-    - Success/error message display
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.petie.bean.UserBean"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -22,6 +13,17 @@
     // Set user attributes for JSTL usage
     pageContext.setAttribute("user", user);
     pageContext.setAttribute("userRole", user.getRole());
+    
+    // Clear session messages after displaying them
+    String msg = (String) session.getAttribute("msg");
+    String error = (String) session.getAttribute("error");
+    
+    if (msg != null) {
+        session.removeAttribute("msg");
+    }
+    if (error != null) {
+        session.removeAttribute("error");
+    }
 %>
 
 <!DOCTYPE html>
@@ -73,12 +75,12 @@
         
         /* Page Header */
         .page-header {
-            background: linear-gradient(135deg, var(--pet-danger) 0%, #c0392b 100%);
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
             color: white;
-            border-radius: var(--border-radius);
+            border-radius: 12px;
             padding: 25px 30px;
             margin-bottom: 30px;
-            box-shadow: var(--box-shadow-lg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
         
         .page-header h1 {
@@ -94,23 +96,57 @@
             font-size: 16px;
         }
         
+        /* Message Display */
+        .message-container {
+            margin-bottom: 30px;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .alert-error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
         /* Form Container */
         .form-container {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 12px;
             padding: 40px;
-            box-shadow: var(--box-shadow-lg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
             margin-bottom: 40px;
         }
         
         .form-header {
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 2px solid var(--light-gray);
+            border-bottom: 2px solid #eee;
         }
         
         .form-header h2 {
-            color: var(--pet-dark);
+            color: #34495e;
             margin: 0;
             display: flex;
             align-items: center;
@@ -118,7 +154,7 @@
         }
         
         .form-header p {
-            color: var(--pet-gray);
+            color: #95a5a6;
             margin: 10px 0 0 0;
         }
         
@@ -148,17 +184,17 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: var(--pet-dark);
+            color: #34495e;
             font-size: 14px;
         }
         
         .form-label .required {
-            color: var(--pet-danger);
+            color: #e74c3c;
             margin-left: 3px;
         }
         
         .form-label .hint {
-            color: var(--pet-gray);
+            color: #95a5a6;
             font-weight: normal;
             font-size: 12px;
             margin-left: 5px;
@@ -167,7 +203,7 @@
         .form-control {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid var(--light-gray);
+            border: 2px solid #eee;
             border-radius: 8px;
             font-size: 16px;
             transition: all 0.3s;
@@ -177,13 +213,9 @@
         
         .form-control:focus {
             outline: none;
-            border-color: var(--pet-primary);
+            border-color: #4a90e2;
             background-color: white;
             box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-        }
-        
-        .form-control::placeholder {
-            color: #adb5bd;
         }
         
         textarea.form-control {
@@ -202,7 +234,7 @@
             align-items: center;
             justify-content: center;
             padding: 40px 20px;
-            border: 2px dashed var(--light-gray);
+            border: 2px dashed #eee;
             border-radius: 8px;
             background-color: #f8f9fa;
             cursor: pointer;
@@ -211,23 +243,23 @@
         }
         
         .file-upload-label:hover {
-            border-color: var(--pet-primary);
+            border-color: #4a90e2;
             background-color: #e9ecef;
         }
         
         .file-upload-icon {
             font-size: 48px;
-            color: var(--pet-primary);
+            color: #4a90e2;
             margin-bottom: 15px;
         }
         
         .file-upload-text {
-            color: var(--pet-gray);
+            color: #95a5a6;
             font-size: 14px;
         }
         
         .file-upload-text strong {
-            color: var(--pet-primary);
+            color: #4a90e2;
         }
         
         .file-input {
@@ -248,21 +280,17 @@
             max-width: 100%;
             max-height: 200px;
             border-radius: 8px;
-            border: 1px solid var(--light-gray);
+            border: 1px solid #eee;
         }
         
         .file-name {
             margin-top: 8px;
             font-size: 14px;
-            color: var(--pet-gray);
+            color: #95a5a6;
             word-break: break-all;
         }
         
-        /* Pet Type Select Styling */
-        .pet-type-select {
-            position: relative;
-        }
-        
+        /* Pet Type Quick Selection */
         .pet-type-options {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -272,7 +300,7 @@
         
         .pet-type-option {
             padding: 12px;
-            border: 2px solid var(--light-gray);
+            border: 2px solid #eee;
             border-radius: 8px;
             text-align: center;
             cursor: pointer;
@@ -281,60 +309,41 @@
         }
         
         .pet-type-option:hover {
-            border-color: var(--pet-primary);
+            border-color: #4a90e2;
             background-color: #f8f9fa;
         }
         
         .pet-type-option.selected {
-            border-color: var(--pet-primary);
+            border-color: #4a90e2;
             background-color: rgba(74, 144, 226, 0.1);
         }
         
         .pet-type-icon {
             font-size: 24px;
             margin-bottom: 8px;
-            color: var(--pet-primary);
+            color: #4a90e2;
         }
         
         .pet-type-name {
             font-size: 14px;
             font-weight: 500;
-            color: var(--pet-dark);
-        }
-        
-        /* Location Input with Map Icon */
-        .location-input {
-            position: relative;
-        }
-        
-        .location-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--pet-primary);
-            pointer-events: none;
-        }
-        
-        /* Date Input Styling */
-        .date-input {
-            position: relative;
+            color: #34495e;
         }
         
         /* Situation Textarea */
         .situation-counter {
             text-align: right;
             font-size: 12px;
-            color: var(--pet-gray);
+            color: #95a5a6;
             margin-top: 5px;
         }
         
         .situation-counter.warning {
-            color: var(--pet-secondary);
+            color: #f39c12;
         }
         
         .situation-counter.danger {
-            color: var(--pet-danger);
+            color: #e74c3c;
         }
         
         /* Form Actions */
@@ -344,11 +353,11 @@
             justify-content: flex-end;
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid var(--light-gray);
+            border-top: 1px solid #eee;
         }
         
         .btn-submit {
-            background: linear-gradient(135deg, var(--pet-danger) 0%, #c0392b 100%);
+            background: #27ae60;
             color: white;
             border: none;
             padding: 14px 30px;
@@ -360,17 +369,19 @@
             align-items: center;
             gap: 10px;
             transition: all 0.3s;
+            min-width: 160px;
+            justify-content: center;
         }
         
         .btn-submit:hover {
-            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            background: #219653;
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
         }
         
         .btn-submit:disabled {
-            background: var(--light-gray);
-            color: var(--pet-gray);
+            background: #95a5a6;
+            color: #7f8c8d;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
@@ -378,8 +389,8 @@
         
         .btn-cancel {
             background: white;
-            color: var(--pet-dark);
-            border: 2px solid var(--light-gray);
+            color: #34495e;
+            border: 2px solid #eee;
             padding: 14px 30px;
             border-radius: 8px;
             font-size: 16px;
@@ -393,71 +404,9 @@
         }
         
         .btn-cancel:hover {
-            border-color: var(--pet-gray);
+            border-color: #95a5a6;
+            transform: translateY(-2px);
             background-color: #f8f9fa;
-        }
-        
-        /* Tips Section */
-        .tips-section {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: var(--border-radius);
-            padding: 25px;
-            margin-top: 40px;
-            border-left: 5px solid var(--pet-secondary);
-        }
-        
-        .tips-section h3 {
-            color: var(--pet-dark);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .tips-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .tips-list li {
-            padding: 8px 0;
-            color: var(--pet-gray);
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        
-        .tips-list li i {
-            color: var(--pet-secondary);
-            margin-top: 3px;
-        }
-        
-        /* Message Display */
-        .message-container {
-            margin-bottom: 30px;
-        }
-        
-        .alert-success {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            padding: 15px 20px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .alert-error {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            padding: 15px 20px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
         /* Loading Animation */
@@ -477,11 +426,11 @@
         
         /* Validation Styles */
         .form-control.error {
-            border-color: var(--pet-danger);
+            border-color: #e74c3c;
         }
         
         .error-message {
-            color: var(--pet-danger);
+            color: #e74c3c;
             font-size: 12px;
             margin-top: 5px;
             display: none;
@@ -489,6 +438,58 @@
         
         .error-message.show {
             display: block;
+        }
+        
+        /* Tips Section */
+        .tips-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 40px;
+            border-left: 5px solid #f39c12;
+        }
+        
+        .tips-section h3 {
+            color: #34495e;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tips-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .tips-list li {
+            padding: 8px 0;
+            color: #95a5a6;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .tips-list li i {
+            color: #f39c12;
+            margin-top: 3px;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 20px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn-submit, .btn-cancel {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -534,14 +535,14 @@
                     <p>Please provide as much information as possible to help our rescue team.</p>
                 </div>
                 
-                <!-- Report Form -->
-                <form action="ReportStrayServlet" method="post" enctype="multipart/form-data" id="reportForm" onsubmit="return validateForm()">
+                <!-- Report Form - Fixed to match your servlet's expected parameters -->
+                <form action="ReportStrayServlet" method="POST" enctype="multipart/form-data" id="reportForm">
                     <div class="form-grid">
                         <!-- Photo Upload -->
                         <div class="form-group full-width">
                             <label class="form-label">
-                                Upload Photo <span class="required">*</span>
-                                <span class="hint">(Max 5MB, JPG/PNG only)</span>
+                                Upload Photo <span ></span>
+                                <span class="hint">(Max 10MB, JPG/PNG only)</span>
                             </label>
                             <div class="file-upload-container">
                                 <label for="petPhoto" class="file-upload-label">
@@ -556,7 +557,7 @@
                                         </div>
                                     </div>
                                 </label>
-                                <input type="file" id="petPhoto" name="petPhoto" class="file-input" accept="image/*" required>
+                                <input type="file" id="petPhoto" name="petPhoto" class="file-input" accept="image/*" >
                                 
                                 <div class="file-preview" id="filePreview">
                                     <img id="previewImage" src="" alt="Preview">
@@ -618,14 +619,16 @@
                         <div class="form-group">
                             <label class="form-label">
                                 Location Found <span class="required">*</span>
+                                <span class="hint">(Street name, area, city)</span>
                             </label>
                             <div class="location-input">
                                 <input type="text" 
                                        id="location" 
                                        name="location" 
                                        class="form-control" 
-                                       placeholder="e.g., Jalan Ampang, KLCC Park"
-                                       required>
+                                       placeholder="e.g., Jalan Ampang, KLCC Park, Kuala Lumpur"
+                                       required
+                                       maxlength="200">
                                 <i class="fas fa-map-marker-alt location-icon"></i>
                             </div>
                             <div class="error-message" id="locationError"></div>
@@ -673,13 +676,14 @@
                     
                     <!-- Form Actions -->
                     <div class="form-actions">
-                        <a href="report_stray.jsp" class="btn-cancel">
-                            <i class="fas fa-times"></i> Cancel
-                        </a>
-                        <button type="submit" class="btn-submit" id="submitBtn">
+                        <button type="submit" class="btn-submit" id="submitBtn" onclick="handleSubmit()">
                             <i class="fas fa-paper-plane"></i> Submit Report
                             <div class="loading-spinner" id="loadingSpinner"></div>
                         </button>
+                        
+                        <a href="home.jsp" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
                     </div>
                 </form>
             </div>
@@ -736,14 +740,15 @@
                 
                 if (file) {
                     // Validate file type and size
-                    if (!file.type.match('image.*')) {
-                        showError('photoError', 'Please upload an image file (JPG, PNG, etc.)');
+                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (!validTypes.includes(file.type.toLowerCase())) {
+                        showError('photoError', 'Please upload a valid image file (JPG, PNG, GIF)');
                         fileInput.value = '';
                         return;
                     }
                     
-                    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                        showError('photoError', 'File size must be less than 5MB');
+                    if (file.size > 10 * 1024 * 1024) { // 10MB limit (matches your servlet)
+                        showError('photoError', 'File size must be less than 10MB');
                         fileInput.value = '';
                         return;
                     }
@@ -799,6 +804,7 @@
             document.getElementById('dateFound').addEventListener('change', function() {
                 const selectedDate = new Date(this.value);
                 const today = new Date();
+                today.setHours(0, 0, 0, 0); // Reset time part for accurate comparison
                 
                 if (selectedDate > today) {
                     showError('dateError', 'Date cannot be in the future');
@@ -838,9 +844,11 @@
             const errorElement = document.getElementById(elementId);
             const inputElement = document.getElementById(elementId.replace('Error', ''));
             
-            errorElement.textContent = message;
-            errorElement.classList.add('show');
-            inputElement.classList.add('error');
+            if (errorElement && inputElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+                inputElement.classList.add('error');
+            }
         }
         
         // Clear error message
@@ -848,9 +856,35 @@
             const errorElement = document.getElementById(elementId);
             const inputElement = document.getElementById(elementId.replace('Error', ''));
             
-            errorElement.textContent = '';
-            errorElement.classList.remove('show');
-            inputElement.classList.remove('error');
+            if (errorElement && inputElement) {
+                errorElement.textContent = '';
+                errorElement.classList.remove('show');
+                inputElement.classList.remove('error');
+            }
+        }
+        
+        // Form validation and submission
+        function handleSubmit() {
+            const form = document.getElementById('reportForm');
+            
+            // Validate form first
+            if (!validateForm()) {
+                return false;
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            submitBtn.disabled = true;
+            loadingSpinner.style.display = 'block';
+            submitBtn.innerHTML = 'Submitting...';
+            
+            // Submit the form
+            form.submit();
+            
+            // Prevent default to allow form submission to proceed
+            return false;
         }
         
         // Form validation
@@ -870,12 +904,27 @@
             if (!photoInput.files || photoInput.files.length === 0) {
                 showError('photoError', 'Please upload a photo of the animal');
                 isValid = false;
+            } else {
+                const file = photoInput.files[0];
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                
+                if (!validTypes.includes(file.type.toLowerCase())) {
+                    showError('photoError', 'Please upload a valid image file (JPG, PNG, GIF)');
+                    isValid = false;
+                } else if (file.size > maxSize) {
+                    showError('photoError', 'File size must be less than 10MB');
+                    isValid = false;
+                }
             }
             
             // Validate pet type
             const petType = document.getElementById('petType').value.trim();
             if (!petType) {
                 showError('petTypeError', 'Please specify the type of animal');
+                isValid = false;
+            } else if (petType.length > 50) {
+                showError('petTypeError', 'Pet type must be less than 50 characters');
                 isValid = false;
             }
             
@@ -884,6 +933,9 @@
             if (!location) {
                 showError('locationError', 'Please provide the location where the animal was found');
                 isValid = false;
+            } else if (location.length > 200) {
+                showError('locationError', 'Location must be less than 200 characters');
+                isValid = false;
             }
             
             // Validate date
@@ -891,6 +943,15 @@
             if (!dateFound) {
                 showError('dateError', 'Please select the date when the animal was found');
                 isValid = false;
+            } else {
+                const selectedDate = new Date(dateFound);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (selectedDate > today) {
+                    showError('dateError', 'Date cannot be in the future');
+                    isValid = false;
+                }
             }
             
             // Validate situation
@@ -901,17 +962,9 @@
             } else if (situation.length < 20) {
                 showError('situationError', 'Please provide more details (minimum 20 characters)');
                 isValid = false;
-            }
-            
-            // If form is valid, show loading spinner
-            if (isValid) {
-                const submitBtn = document.getElementById('submitBtn');
-                const loadingSpinner = document.getElementById('loadingSpinner');
-                
-                submitBtn.disabled = true;
-                loadingSpinner.style.display = 'block';
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submitting...';
-                submitBtn.insertBefore(loadingSpinner, submitBtn.firstChild);
+            } else if (situation.length > 1000) {
+                showError('situationError', 'Description must be less than 1000 characters');
+                isValid = false;
             }
             
             return isValid;
@@ -967,10 +1020,10 @@
                     mainContent.style.width = '100%';
                 } else {
                     const sidebar = document.querySelector('.sidebar-container');
-                    if (sidebar.classList.contains('collapsed')) {
+                    if (sidebar && sidebar.classList.contains('collapsed')) {
                         mainContent.style.marginLeft = '70px';
                         mainContent.style.width = 'calc(100% - 70px)';
-                    } else {
+                    } else if (sidebar) {
                         mainContent.style.marginLeft = '280px';
                         mainContent.style.width = 'calc(100% - 280px)';
                     }

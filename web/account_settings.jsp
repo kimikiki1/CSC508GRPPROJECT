@@ -6,11 +6,22 @@
         response.sendRedirect("login.jsp"); 
         return; 
     }
+    
+    // Clear session messages after displaying them
+    String msg = (String) session.getAttribute("msg");
+    String error = (String) session.getAttribute("error");
+    
+    if (msg != null) {
+        session.removeAttribute("msg");
+    }
+    if (error != null) {
+        session.removeAttribute("error");
+    }
 %>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Account Settings - Petie Adoption System</title>
+    <title>Account Settings - Petie Adoptie System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* CSS Variables - Same as report_stray.jsp */
@@ -38,7 +49,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             color: #333;
             min-height: 100vh;
         }
@@ -49,7 +60,9 @@
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 20px;
             min-height: 100vh;
+            will-change: margin-left;
             width: calc(100% - 280px);
+            box-sizing: border-box;
         }
         
         .sidebar-container.collapsed ~ .main-content {
@@ -420,13 +433,24 @@
                 justify-content: center;
             }
         }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
-    <!-- Include Navigation Sidebar (same as report_stray.jsp) -->
+    <!-- Include Navigation Sidebar -->
     <%@include file="navbar.jsp" %>
     
-    <!-- Main Content Area (same structure as report_stray.jsp) -->
+    <!-- Main Content Area -->
     <div class="main-content">
         <div class="settings-container">
             <!-- Page Header -->
@@ -439,9 +463,19 @@
                 </p>
             </div>
             
-            <!-- Message Display -->
+            <!-- Message Display - SHOW ACTUAL MESSAGES -->
             <div class="message-container" id="messageContainer">
-                <!-- Messages will be shown here via JavaScript -->
+                <% if (msg != null) { %>
+                    <div class="alert-success" id="successMessage">
+                        <i class="fas fa-check-circle"></i> <%= msg %>
+                    </div>
+                <% } %>
+                
+                <% if (error != null) { %>
+                    <div class="alert-error" id="errorMessage">
+                        <i class="fas fa-exclamation-circle"></i> <%= error %>
+                    </div>
+                <% } %>
             </div>
             
             <!-- Form Container -->
@@ -477,8 +511,8 @@
                     </p>
                 </div>
                 
-                <!-- Profile Form -->
-                <form action="UpdateProfileServlet" method="post" id="profileForm">
+                <!-- Profile Form - ACTUALLY SUBMITS TO SERVLET -->
+                <form action="UpdateProfileServlet" method="post" id="profileForm" onsubmit="return validateAndSubmit()">
                     <div class="form-grid">
                         <!-- Full Name -->
                         <div class="form-group">
@@ -489,7 +523,7 @@
                                    id="fullName" 
                                    name="fullname" 
                                    class="form-control" 
-                                   value="<%= user.getFullName() %>" 
+                                   value="<%= user.getFullName() != null ? user.getFullName() : "" %>" 
                                    required>
                             <div class="error-message" id="fullNameError"></div>
                         </div>
@@ -503,7 +537,7 @@
                                    id="username" 
                                    name="username" 
                                    class="form-control" 
-                                   value="<%= user.getUsername() %>" 
+                                   value="<%= user.getUsername() != null ? user.getUsername() : "" %>" 
                                    required>
                             <div class="error-message" id="usernameError"></div>
                         </div>
@@ -517,7 +551,7 @@
                                    id="email" 
                                    name="email" 
                                    class="form-control" 
-                                   value="<%= user.getEmail() %>" 
+                                   value="<%= user.getEmail() != null ? user.getEmail() : "" %>" 
                                    readonly>
                             <span class="hint">Email cannot be changed</span>
                         </div>
@@ -578,245 +612,248 @@
     </div>
     
     <!-- JavaScript for Interactive Features -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize real-time validation
-            document.getElementById('fullName').addEventListener('input', function() {
-                if (this.value.trim().length >= 2) {
-                    clearError('fullNameError');
-                }
-            });
+    <!-- JavaScript for Interactive Features -->
+<script>
+    // Function to initialize sidebar toggle button icons
+    function initializeSidebarToggle() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar-container');
+        
+        if (sidebarToggle && sidebar) {
+            console.log('Initializing sidebar toggle...');
             
-            document.getElementById('username').addEventListener('input', function() {
-                const username = this.value.trim();
-                if (username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username)) {
-                    clearError('usernameError');
-                }
-            });
-            
-            document.getElementById('phone').addEventListener('input', function() {
-                const phone = this.value.trim();
-                if (phone === '' || /^[\d\s\-\+\(\)]+$/.test(phone)) {
-                    clearError('phoneError');
-                }
-            });
-            
-            // Form submission
-            document.getElementById('profileForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Validate form
-                if (validateForm()) {
-                    // Show loading state
-                    const submitBtn = document.getElementById('saveProfileBtn');
-                    const loadingSpinner = document.getElementById('loadingSpinner');
-                    
-                    submitBtn.disabled = true;
-                    loadingSpinner.style.display = 'block';
-                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Saving...';
-                    submitBtn.insertBefore(loadingSpinner, submitBtn.firstChild);
-                    
-                    // Simulate save for demo
-                    setTimeout(() => {
-                        showMessage('success', 'Profile updated successfully!');
-                        
-                        // Reset button state
-                        submitBtn.disabled = false;
-                        loadingSpinner.style.display = 'none';
-                        submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
-                        
-                        // In production, uncomment this to actually submit the form
-                        // this.submit();
-                    }, 1500);
-                }
-            });
-            
-            // Check for URL parameters for messages
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('msg')) {
-                showMessage('success', decodeURIComponent(urlParams.get('msg')));
+            // Set initial icon
+            if (sidebar.classList.contains('collapsed')) {
+                sidebarToggle.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            } else {
+                sidebarToggle.innerHTML = '<i class="fas fa-chevron-left"></i>';
             }
-            if (urlParams.has('error')) {
-                showMessage('error', decodeURIComponent(urlParams.get('error')));
+            
+            // Listen for clicks to update icon
+            sidebarToggle.addEventListener('click', function() {
+                console.log('Sidebar toggle clicked');
+                setTimeout(() => {
+                    if (sidebar.classList.contains('collapsed')) {
+                        sidebarToggle.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                    } else {
+                        sidebarToggle.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                    }
+                }, 300);
+            });
+        } else {
+            console.log('Sidebar toggle elements not found:', {
+                sidebarToggle: sidebarToggle,
+                sidebar: sidebar
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Account Settings page loaded');
+        
+        // Initialize sidebar toggle button icons FIRST
+        initializeSidebarToggle();
+        
+        // Auto-hide messages after 5 seconds
+        setTimeout(function() {
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+            
+            if (successMsg) {
+                successMsg.style.opacity = '0';
+                successMsg.style.transition = 'opacity 0.5s';
+                setTimeout(() => successMsg.remove(), 500);
+            }
+            
+            if (errorMsg) {
+                errorMsg.style.opacity = '0';
+                errorMsg.style.transition = 'opacity 0.5s';
+                setTimeout(() => errorMsg.remove(), 500);
+            }
+        }, 5000);
+        
+        // Initialize real-time validation
+        document.getElementById('fullName').addEventListener('input', function() {
+            if (this.value.trim().length >= 2) {
+                clearError('fullNameError');
             }
         });
         
-        // Handle profile picture upload
-        function handleProfilePictureUpload(event) {
-            const file = event.target.files[0];
-            const preview = document.getElementById('profilePicture');
-            
-            if (file) {
-                // Validate file type and size
-                if (!file.type.match('image.*')) {
-                    showMessage('error', 'Please upload an image file (JPG, PNG, etc.)');
-                    return;
-                }
-                
-                if (file.size > 2 * 1024 * 1024) { // 2MB limit
-                    showMessage('error', 'File size must be less than 2MB');
-                    return;
-                }
-                
-                // Preview image
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                }
-                reader.readAsDataURL(file);
-                
-                showMessage('success', 'Profile picture updated! Click "Save Changes" to apply.');
+        document.getElementById('username').addEventListener('input', function() {
+            const username = this.value.trim();
+            if (username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username)) {
+                clearError('usernameError');
             }
-        }
+        });
         
-        // Show message function
-        function showMessage(type, text) {
-            const container = document.getElementById('messageContainer');
-            const message = document.createElement('div');
-            
-            let icon = 'exclamation-circle';
-            if (type === 'success') {
-                icon = 'check-circle';
-                message.className = 'alert-success';
-            } else {
-                message.className = 'alert-error';
+        document.getElementById('phone').addEventListener('input', function() {
+            const phone = this.value.trim();
+            if (phone === '' || /^[\d\s\-\+\(\)]+$/.test(phone)) {
+                clearError('phoneError');
+            }
+        });
+    });
+    
+    // Handle profile picture upload (for preview only)
+    function handleProfilePictureUpload(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('profilePicture');
+        
+        if (file) {
+            // Validate file type and size
+            if (!file.type.match('image.*')) {
+                showMessage('error', 'Please upload an image file (JPG, PNG, etc.)');
+                return;
             }
             
-            message.innerHTML = '<i class="fas fa-' + icon + '"></i> ' + text;
-            container.innerHTML = '';
-            container.appendChild(message);
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                showMessage('error', 'File size must be less than 2MB');
+                return;
+            }
             
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                message.style.opacity = '0';
-                message.style.transition = 'opacity 0.5s';
-                setTimeout(() => message.remove(), 500);
-            }, 5000);
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+            
+            showMessage('info', 'Profile picture preview updated. Note: Picture upload feature is not implemented yet.');
+        }
+    }
+    
+    // Form validation and submission
+    function validateAndSubmit() {
+        // Validate form first
+        if (!validateForm()) {
+            return false;
         }
         
-        // Show error message
-        function showError(elementId, message) {
-            const errorElement = document.getElementById(elementId);
-            const inputElement = document.getElementById(elementId.replace('Error', ''));
-            
+        // Show loading state
+        const submitBtn = document.getElementById('saveProfileBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        
+        submitBtn.disabled = true;
+        loadingSpinner.style.display = 'block';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        
+        // Form will submit normally to UpdateProfileServlet
+        return true;
+    }
+    
+    // Show message function
+    function showMessage(type, text) {
+        const container = document.getElementById('messageContainer');
+        const message = document.createElement('div');
+        
+        let icon = 'exclamation-circle';
+        if (type === 'success') {
+            icon = 'check-circle';
+            message.className = 'alert-success';
+        } else if (type === 'error') {
+            icon = 'exclamation-circle';
+            message.className = 'alert-error';
+        } else {
+            icon = 'info-circle';
+            message.className = 'alert-info';
+        }
+        
+        message.innerHTML = '<i class="fas fa-' + icon + '"></i> ' + text;
+        container.appendChild(message);
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            message.style.opacity = '0';
+            message.style.transition = 'opacity 0.5s';
+            setTimeout(() => message.remove(), 500);
+        }, 5000);
+    }
+    
+    // Show error message
+    function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        const inputElement = document.getElementById(elementId.replace('Error', ''));
+        
+        if (errorElement && inputElement) {
             errorElement.textContent = message;
             errorElement.classList.add('show');
-            if (inputElement) {
-                inputElement.classList.add('error');
-            }
+            inputElement.classList.add('error');
+            inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+    }
+    
+    // Clear error message
+    function clearError(elementId) {
+        const errorElement = document.getElementById(elementId);
+        const inputElement = document.getElementById(elementId.replace('Error', ''));
         
-        // Clear error message
-        function clearError(elementId) {
-            const errorElement = document.getElementById(elementId);
-            const inputElement = document.getElementById(elementId.replace('Error', ''));
-            
+        if (errorElement && inputElement) {
             errorElement.textContent = '';
             errorElement.classList.remove('show');
-            if (inputElement) {
-                inputElement.classList.remove('error');
-            }
+            inputElement.classList.remove('error');
+        }
+    }
+    
+    // Form validation
+    function validateForm() {
+        let isValid = true;
+        
+        // Reset all errors
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.classList.remove('show');
+        });
+        document.querySelectorAll('.form-control').forEach(el => {
+            el.classList.remove('error');
+        });
+        
+        // Validate full name
+        const fullName = document.getElementById('fullName').value.trim();
+        if (fullName.length < 2) {
+            showError('fullNameError', 'Full name must be at least 2 characters');
+            isValid = false;
+        } else if (fullName.length > 100) {
+            showError('fullNameError', 'Full name must be less than 100 characters');
+            isValid = false;
         }
         
-        // Form validation
-        function validateForm() {
-            let isValid = true;
-            
-            // Reset all errors
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.classList.remove('show');
-            });
-            document.querySelectorAll('.form-control').forEach(el => {
-                el.classList.remove('error');
-            });
-            
-            // Validate full name
-            const fullName = document.getElementById('fullName').value.trim();
-            if (fullName.length < 2) {
-                showError('fullNameError', 'Full name must be at least 2 characters');
-                isValid = false;
-            }
-            
-            // Validate username
-            const username = document.getElementById('username').value.trim();
-            if (username.length < 3) {
-                showError('usernameError', 'Username must be at least 3 characters');
-                isValid = false;
-            } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-                showError('usernameError', 'Username can only contain letters, numbers, and underscores');
-                isValid = false;
-            }
-            
-            // Validate phone (optional)
-            const phone = document.getElementById('phone').value.trim();
-            if (phone && !/^[\d\s\-\+\(\)]+$/.test(phone)) {
-                showError('phoneError', 'Please enter a valid phone number');
-                isValid = false;
-            }
-            
-            return isValid;
+        // Validate username
+        const username = document.getElementById('username').value.trim();
+        if (username.length < 3) {
+            showError('usernameError', 'Username must be at least 3 characters');
+            isValid = false;
+        } else if (username.length > 50) {
+            showError('usernameError', 'Username must be less than 50 characters');
+            isValid = false;
+        } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            showError('usernameError', 'Username can only contain letters, numbers, and underscores');
+            isValid = false;
         }
         
-        // Sidebar integration (same as report_stray.jsp)
-        window.addEventListener('sidebarToggle', function(e) {
-            const sidebarCollapsed = e.detail.collapsed;
-            const mainContent = document.querySelector('.main-content');
-            
-            if (mainContent) {
-                if (sidebarCollapsed) {
-                    mainContent.style.marginLeft = '70px';
-                    mainContent.style.width = 'calc(100% - 70px)';
-                } else {
-                    mainContent.style.marginLeft = '280px';
-                    mainContent.style.width = 'calc(100% - 280px)';
-                }
-            }
-        });
+        // Validate phone (optional)
+        const phone = document.getElementById('phone').value.trim();
+        if (phone && !/^[\d\s\-\+\(\)]{10,15}$/.test(phone.replace(/[\s\-\+\(\)]/g, ''))) {
+            showError('phoneError', 'Please enter a valid phone number (10-15 digits)');
+            isValid = false;
+        }
         
-        // Initial setup for responsive layout
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.querySelector('.sidebar-container');
-            const mainContent = document.querySelector('.main-content');
-            
-            if (sidebar && mainContent) {
-                if (sidebar.classList.contains('collapsed')) {
-                    mainContent.style.marginLeft = '70px';
-                    mainContent.style.width = 'calc(100% - 70px)';
-                } else {
-                    mainContent.style.marginLeft = '280px';
-                    mainContent.style.width = 'calc(100% - 280px)';
-                }
-            }
-            
-            // Mobile check
-            if (window.innerWidth <= 992) {
-                if (mainContent) {
-                    mainContent.style.marginLeft = '0';
-                    mainContent.style.width = '100%';
-                }
-            }
-        });
+        return isValid;
+    }
+    
+    // Sidebar integration
+    window.addEventListener('sidebarToggle', function(e) {
+        const sidebarCollapsed = e.detail.collapsed;
+        const mainContent = document.querySelector('.main-content');
         
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            const mainContent = document.querySelector('.main-content');
-            
-            if (mainContent) {
-                if (window.innerWidth <= 992) {
-                    mainContent.style.marginLeft = '0';
-                    mainContent.style.width = '100%';
-                } else {
-                    const sidebar = document.querySelector('.sidebar-container');
-                    if (sidebar && sidebar.classList.contains('collapsed')) {
-                        mainContent.style.marginLeft = '70px';
-                        mainContent.style.width = 'calc(100% - 70px)';
-                    } else {
-                        mainContent.style.marginLeft = '280px';
-                        mainContent.style.width = 'calc(100% - 280px)';
-                    }
-                }
+        if (mainContent) {
+            if (sidebarCollapsed) {
+                mainContent.style.marginLeft = '70px';
+                mainContent.style.width = 'calc(100% - 70px)';
+            } else {
+                mainContent.style.marginLeft = '280px';
+                mainContent.style.width = 'calc(100% - 280px)';
             }
-        });
-    </script>
+        }
+    });
+</script>
 </body>
 </html>
